@@ -1,4 +1,4 @@
-# Anneal.jl
+# Anneal.jl 🔴🟢🟣🔵
 
 Implements wrappers for QUBO Annealers & Samplers through the `AbstractSampler{T} <: MOI.AbstractOptimizer{T}` API, allowing `MathOptInterface` & `JuMP` integration.
 
