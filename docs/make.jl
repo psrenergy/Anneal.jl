@@ -1,4 +1,6 @@
 using Documenter
+using Pkg
+Pkg.develop(path=joinpath(@__DIR__, ".."))
 using Anneal
 
 # Set up to run docstrings with jldoctest
@@ -25,7 +27,7 @@ makedocs(;
     workdir="."
 )
 
-# deploydocs(
-#     repo=raw"https://github.com/psrenergy/Anneal.jl.git",
-#     push_preview = true
-# )
+deploydocs(
+    repo=raw"github.com/psrenergy/Anneal.jl.git",
+    push_preview = true
+)
