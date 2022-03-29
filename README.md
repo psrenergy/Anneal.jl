@@ -13,7 +13,7 @@ Implements wrappers for QUBO Annealers & Samplers through the `AbstractSampler{T
 using JuMP
 using Anneal
 
-model = Model(SimulatedAnnealing.Optimizer)
+model = Model(SimulatedAnnealer.Optimizer)
 
 Q = [ 1.0  2.0 -3.0
       2.0 -1.5 -2.0
