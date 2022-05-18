@@ -171,11 +171,10 @@ end
 # -*- ObjectiveValue -*-
 function MOI.get(sampler::AbstractSampler{T}, ov::MOI.ObjectiveValue) where {T}
     n = MOI.get(sampler, MOI.ResultCount())
-
     j = ov.result_index
 
     if !(1 <= j <= n)
-        throw(BoundsError("Result Index is out of bounds: $j ∉ [1, $n]"))
+        throw(MOI.ResultIndexBoundsError(ov, n))
     end
 
     e = sampler.sample_set[j].energy
