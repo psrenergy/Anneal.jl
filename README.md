@@ -48,6 +48,12 @@ Q = [ 1.0  2.0 -3.0
 @objective(model, Min, x' * Q * x)
 
 optimize!(model)
+
+for i = 1:result_count(model)
+    xᵢ = value.(x; result=i)
+    yᵢ = objective_value(model; result=i)
+    println("f($xᵢ) = $yᵢ")
+end
 ```
 
 ## Supported Annealers & Samplers
