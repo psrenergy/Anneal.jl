@@ -20,6 +20,18 @@
 ## Introduction
 This package aims to provide a common [MOI](https://github.com/jump-dev/MathOptInterface.jl)-compliant API for [QUBO](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) Sampling & Annealing machines. It also contains a few testing tools, including utility samplers for performance comparison and sanity checks, and some basic analysis features.
 
+### QUBO
+Problems assigned to solvers defined within Anneal.jl's interface are given by
+
+$$
+\begin{array}{rl}
+\text{QUBO}:~ \min & \vec{x}' Q \vec{x} \\
+      \text{s.t.} & \vec{x} \in \mathbb{B}^{n}
+\end{array}
+$$
+
+where $Q \in \mathbb{R}^{n \times n}$ is a symmetric matrix. Maximization is automatically converted to minimization in a transparent fashion during runtime.
+
 ## Quick Start
 
 ### Installation
