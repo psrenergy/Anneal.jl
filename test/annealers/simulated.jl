@@ -1,8 +1,8 @@
 @testset "Simulated Annealing" begin
     @testset "Regular UI + Attributes" begin
         annealer = SimulatedAnnealer.Optimizer{Float64}(
-            NumberOfReads=500,
-            NumberOfSweeps=500
+            SimulatedAnnealer.NumberOfReads()  => 500,
+            SimulatedAnnealer.NumberOfSweeps() => 500,
         )
 
         # -*- Attributes -*-

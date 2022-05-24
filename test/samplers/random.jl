@@ -1,9 +1,9 @@
 @testset "Random Sampling" begin
     @testset "Regular UI + Attributes" begin
         sampler = RandomSampler.Optimizer{Float64}(
-            NumberOfReads=500,
-            RandomSeed=999,
-            RandomBias=0.9,
+            RandomSampler.NumberOfReads() => 500,
+            RandomSampler.RandomSeed()    => 999,
+            RandomSampler.RandomBias()    => 0.9,
         )
 
         # -*- Attributes -*-
