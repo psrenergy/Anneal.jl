@@ -1,17 +1,3 @@
-abstract type AbstractSamplerAttribute <: MOI.AbstractOptimizerAttribute end
-
-function MOI.get(sampler::AbstractSampler, attr::AbstractSamplerAttribute)
-    if !haskey(sampler.settings, attr)
-        error("No value for optimizer attribute '$attr' in $(MOI.get(sampler, MOI.SolverName()))")
-    else
-        sampler.settings[attr]
-    end
-end
-
-function MOI.set(sampler::AbstractSampler, attr::AbstractSamplerAttribute, value::Any)
-    sampler.settings[attr] = value
-end
-
 function anew_error(item::Any)
     error("Invalid usage of @anew: '$item'")
 end
@@ -73,6 +59,12 @@ macro anew(expr)
                     SampleSet{Int,T}(),
                     SamplerMOI{T}(),
                     Dict{Any,Any}($((:($(esc(attr))() => convert($(esc(type)), $(esc(hint)))) for (attr, hint, type) in hints)...), kws...),
+                )
+
+                # Register raw optimizer attributes
+                merge!(
+                    optimizer.moi.raw_optimizer_attributes,
+                    Dict{Symbol, Any}(nameof(typeof(attr)) => attr for attr in keys(optimizer.settings))
                 )
 
                 return optimizer

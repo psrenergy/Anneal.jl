@@ -1,27 +1,27 @@
 # -*- Sample & SampleSet -*-
-mutable struct Sample{S <: Any, T <: Any}
+mutable struct Sample{S<:Any,T<:Any}
     states::Vector{S}
     reads::Int
     energy::T
 end
 
-mutable struct SampleSet{S <: Any, T <: Any}
-    samples::Vector{Sample{S, T}}
-    mapping::Dict{Vector{S}, Int}
+mutable struct SampleSet{S<:Any,T<:Any}
+    samples::Vector{Sample{S,T}}
+    mapping::Dict{Vector{S},Int}
 
-    function SampleSet{S, T}() where {S, T}
-        return new{S, T}(
-            Vector{Sample{S, T}}(),
-            Dict{Vector{S}, Int}()
+    function SampleSet{S,T}() where {S,T}
+        return new{S,T}(
+            Vector{Sample{S,T}}(),
+            Dict{Vector{S},Int}()
         )
     end
 
     """
     Guarantees duplicate removal and that samples are ordered by energy (<), reads (>) & states (<).
     """
-    function SampleSet{S, T}(data::Vector{Sample{S, T}}) where {S, T}
-        samples = Vector{Sample{S, T}}()
-        mapping = Dict{Vector{S}, Int}()
+    function SampleSet{S,T}(data::Vector{Sample{S,T}}) where {S,T}
+        samples = Vector{Sample{S,T}}()
+        mapping = Dict{Vector{S},Int}()
 
         i = 1
 
@@ -34,13 +34,13 @@ mutable struct SampleSet{S <: Any, T <: Any}
                 i += 1
             end
         end
-        
+
         I = sortperm(samples, by=(ξ) -> (ξ.energy, -ξ.reads, ξ.states))
 
         samples = samples[I]
-        mapping = Dict{Vector{S}, Int}(s => I[i] for (s, i) in mapping)
+        mapping = Dict{Vector{S},Int}(s => I[i] for (s, i) in mapping)
 
-        return new{S, T}(samples, mapping)
+        return new{S,T}(samples, mapping)
     end
 end
 
@@ -59,11 +59,11 @@ function Base.getindex(s::SampleSet, i::Int)
     return getindex(s.samples, i)
 end
 
-function Base.merge(x::SampleSet{S, T}, y::SampleSet{S, T}) where {S, T}
-    return SampleSet{S, T}(Vector{Sample{S, T}}([x.samples; y.samples]))
+function Base.merge(x::SampleSet{S,T}, y::SampleSet{S,T}) where {S,T}
+    return SampleSet{S,T}(Vector{Sample{S,T}}([x.samples; y.samples]))
 end
 
-function Base.merge!(x::SampleSet{S, T}, y::SampleSet{S, T}) where {S, T}
+function Base.merge!(x::SampleSet{S,T}, y::SampleSet{S,T}) where {S,T}
     i = length(x.samples)
 
     for sample in y.samples
@@ -78,28 +78,28 @@ function Base.merge!(x::SampleSet{S, T}, y::SampleSet{S, T}) where {S, T}
     I = sortperm(x.samples, by=(ξ) -> (ξ.energy, -ξ.reads, ξ.states))
 
     x.samples = x.samples[I]
-    x.mapping = Dict{Vector{S}, Int}(s => I[i] for (s, i) in x.mapping)
-    
+    x.mapping = Dict{Vector{S},Int}(s => I[i] for (s, i) in x.mapping)
+
     nothing
 end
 
 function Base.empty!(s::SampleSet)
     empty!(s.samples)
-    empty!(s.mapping)   
+    empty!(s.mapping)
 end
 
 # -*- :: Samplers :: -*-
-abstract type AbstractSampler{T <: Any} <: MOI.AbstractOptimizer end
+abstract type AbstractSampler{T<:Any} <: MOI.AbstractOptimizer end
 
-const SamplerResults = Vector{Tuple{Vector{Int}, Int, Float64}}
+const SamplerResults = Vector{Tuple{Vector{Int},Int,Float64}}
 
 function sample(::AbstractSampler) end
 
 function sample!(sampler::AbstractSampler{T}) where {T}
-    result, δt = sample(sampler)::Tuple{SamplerResults, Float64}
+    result, δt = sample(sampler)::Tuple{SamplerResults,Float64}
 
-    sample_set = SampleSet{Int, T}([Sample{Int, T}(sample...) for sample in result])
-    
+    sample_set = SampleSet{Int,T}([Sample{Int,T}(sample...) for sample in result])
+
     merge!(sampler.sample_set, sample_set)
 
     if sampler.moi.solve_time_sec === NaN
@@ -118,8 +118,8 @@ end
 Base.@kwdef mutable struct SamplerMOI{T}
     name::String = ""
     silent::Bool = false
-    time_limit_sec::Union{Nothing, Float64} = nothing
-    raw_optimizer_attributes::Dict{String, Any} = Dict{String, Any}()
+    time_limit_sec::Maybe{Float64} = nothing
+    raw_optimizer_attributes::Dict{Symbol,Any} = Dict{Symbol,Any}()
     number_of_threads::Int = Threads.nthreads()
 
     solve_time_sec::Float64 = NaN
@@ -128,7 +128,7 @@ Base.@kwdef mutable struct SamplerMOI{T}
     dual_status::MOI.ResultStatusCode = MOI.NO_SOLUTION
     raw_status_string::String = ""
 
-    variable_primal_start::Dict{MOI.VariableIndex, T} = Dict{MOI.VariableIndex, T}()
+    variable_primal_start::Dict{MOI.VariableIndex,T} = Dict{MOI.VariableIndex,T}()
 
     objective_sense::MOI.OptimizationSense = MOI.MIN_SENSE
 end

@@ -91,13 +91,35 @@ end
 
 MOI.supports(::AbstractSampler, ::MOI.TimeLimitSec) = true
 
-# -*- RawOptimizerAttribute (get, set, supports) -*-
-function MOI.get(sampler::AbstractSampler, attr::MOI.RawOptimizerAttribute)
-    return sampler.moi.raw_optimizer_attributes[attr.name]
+abstract type AbstractSamplerAttribute <: MOI.AbstractOptimizerAttribute end
+
+function MOI.get(sampler::AbstractSampler, attr::AbstractSamplerAttribute)
+    if !haskey(sampler.settings, attr)
+        error("No value for optimizer attribute '$attr' in $(MOI.get(sampler, MOI.SolverName()))")
+    else
+        sampler.settings[attr]
+    end
 end
 
-function MOI.set(sampler::AbstractSampler, attr::MOI.RawOptimizerAttribute, value::Any)
-    sampler.moi.raw_optimizer_attributes[attr.name] = value
+function MOI.set(sampler::AbstractSampler, attr::AbstractSamplerAttribute, value::Any)
+    sampler.settings[attr] = value
+end
+
+# -*- RawOptimizerAttribute (get, set, supports) -*-
+function MOI.get(sampler::AbstractSampler, raw_attr::MOI.RawOptimizerAttribute)
+    raw_attr = Symbol(raw_attr.name) 
+
+    if !haskey(sampler.moi.raw_optimizer_attributes, raw_attr)
+        error("No attribute '$raw_attr' for $(typeof(sampler))")
+    else
+        MOI.get(sampler, sampler.moi.raw_optimizer_attributes[raw_attr])
+    end
+end
+
+function MOI.set(sampler::AbstractSampler, raw_attr::MOI.RawOptimizerAttribute, value::Any)
+    raw_attr = Symbol(raw_attr.name)
+
+    MOI.set(sampler, sampler.moi.raw_optimizer_attributes[raw_attr], value)
 end
 
 MOI.supports(::AbstractSampler, ::MOI.RawOptimizerAttribute) = true
