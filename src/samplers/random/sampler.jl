@@ -8,14 +8,14 @@ end
 
 # -*- :: Biased Random State Generation :: -*-
 function random_sample(sampler::Optimizer)
-    s = Int.(rand(sampler.settings.RandomGenerator, sampler.n) .< sampler.settings.RandomBias)
+    s = Int.(rand(sampler.settings[RandomGenerator()], sampler.n) .< sampler.settings[RandomBias()])
     
     return (s, 1, Anneal.energy(sampler, s))
 end
 
 function Anneal.sample(sampler::Optimizer)
     t₀ = time()
-    samples = [random_sample(sampler) for _ = 1:sampler.settings.NumberOfReads]
+    samples = [random_sample(sampler) for _ = 1:sampler.settings[NumberOfReads()]]
     t₁ = time()
 
     δt = t₁ - t₀

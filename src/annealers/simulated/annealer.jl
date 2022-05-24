@@ -17,8 +17,8 @@ function Anneal.sample(annealer::Optimizer{T}) where {T}
     t₀ = time()
     samples = [(pyconvert.(Int, s), pyconvert(Int, n), pyconvert(Float64, e + annealer.c)) for (s, e, n) ∈ sampler.sample_qubo(
         annealer.Q;
-        num_reads=annealer.settings.NumberOfReads,
-        num_sweeps=annealer.settings.NumberOfSweeps,
+        num_reads=annealer.settings[NumberOfReads()],
+        num_sweeps=annealer.settings[NumberOfSweeps()],
     ).record]
     t₁ = time()
 
