@@ -43,8 +43,6 @@ or
 julia> import Pkg; Pkg.add("Anneal")
 ``` 
 
-**Note:** There is a [known issue](https://github.com/psrenergy/Anneal.jl/issues/7) that makes precompilation fail on Windows. After failing, the command `using Anneal` gives a quick fix, finishing the installation.
-
 ### Example
 ```julia
 using JuMP

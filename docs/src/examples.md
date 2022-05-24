@@ -1,7 +1,7 @@
 # Examples
 
 ## Simple QUBO
-```@example
+```@example simple-qubo
 using JuMP
 using Anneal
 
@@ -15,10 +15,16 @@ Q = [ 1.0  2.0 -3.0
 @objective(model, Min, x' * Q * x)
 
 optimize!(model)
+
+for i = 1:result_count(model)
+      xi = value.(x; result = i)
+      yi = objective_value(model; result = i)
+      println("f($xi) = $yi")
+end
 ```
 
 ## Optimizer Settings
-```julia
-set_optimizer_parameter(model, SimulatedAnnealer.NumReads, 500)
-set_optimizer_parameter(model, SimulatedAnnealer.NumSweeps, 500)
+```@example simple-qubo
+set_optimizer_parameter(model, SimulatedAnnealer.NumberOfReads(), 500)
+get_optimizer_parameter(model, SimulatedAnnealer.NumberOfReads())
 ```
