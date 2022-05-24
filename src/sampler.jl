@@ -122,7 +122,6 @@ Base.@kwdef mutable struct SamplerMOI{T}
     raw_optimizer_attributes::Dict{String, Any} = Dict{String, Any}()
     number_of_threads::Int = Threads.nthreads()
 
-    objective_value::T = zero(T)
     solve_time_sec::Float64 = NaN
     termination_status::MOI.TerminationStatusCode = MOI.OPTIMIZE_NOT_CALLED
     primal_status::MOI.ResultStatusCode = MOI.NO_SOLUTION
@@ -141,7 +140,6 @@ function Base.empty!(moi::SamplerMOI{T}) where {T}
     empty!(moi.raw_optimizer_attributes)
     moi.number_of_threads = Threads.nthreads()
 
-    moi.objective_value = zero(T)
     moi.solve_time_sec = NaN
     moi.termination_status = MOI.OPTIMIZE_NOT_CALLED
     moi.primal_status = MOI.NO_SOLUTION
