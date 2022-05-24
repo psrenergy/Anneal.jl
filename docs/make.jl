@@ -14,14 +14,14 @@ makedocs(;
     clean=true,
     format=Documenter.HTML(
         assets = ["assets/extra_styles.css"], #, "assets/favicon.ico"],
-        mathengine=Documenter.MathJax2(),
+        mathengine=Documenter.KaTeX(),
         sidebar_sitename=false,
     ), 
     sitename="Anneal.jl",
     authors="Pedro Xavier and Tiago Andrade and Joaquim Garcia and David Bernal",
     pages=[
         "Home" => "index.md",
-        # "manual.md",
+        "Manual" => "manual.md",
         # "examples.md",
     ],
     workdir="."
