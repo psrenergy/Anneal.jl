@@ -10,8 +10,10 @@ const SAF{T} = MOI.ScalarAffineFunction{T}
 const SAT{T} = MOI.ScalarAffineTerm{T}
 const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
-
 const Maybe{T} = Union{T, Nothing}
+
+# -*- Exports: Interface -*-
+export MOI, AbstractSampler, AbstractSamplerAttribute, @anew
 
 # -*- Exports: Submodules -*-
 export ExactSampler, RandomSampler, IdentitySampler
@@ -20,7 +22,8 @@ export SimulatedAnnealer
 # -*- Includes: Anneal -*-
 include("error.jl")
 include("tools.jl")
-include("sampler.jl")
+include("sampleset.jl")
+include("interface.jl")
 include("MOI_wrapper.jl")
 include("macros.jl")
 

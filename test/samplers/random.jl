@@ -1,27 +1,22 @@
 @testset "Random Sampling" begin
     @testset "Regular UI + Attributes" begin
-        sampler = RandomSampler.Optimizer{Float64}(
-            RandomSampler.NumberOfReads() => 500,
-            RandomSampler.RandomSeed()    => 999,
-            RandomSampler.RandomBias()    => 0.9,
-        )
+        sampler = RandomSampler.Optimizer{Float64}()
 
         # -*- Attributes -*-
-        @test (MOI.get(sampler, RandomSampler.NumberOfReads()) == 500)
-
-        MOI.set(sampler, RandomSampler.NumberOfReads(), 1_000)
-
         @test (MOI.get(sampler, RandomSampler.NumberOfReads()) == 1_000)
 
+        MOI.set(sampler, RandomSampler.NumberOfReads(), 500)
 
-        @test (MOI.get(sampler, RandomSampler.RandomSeed()) == 999)
-
-        MOI.set(sampler, RandomSampler.RandomSeed(), 111)
-
-        @test (MOI.get(sampler, RandomSampler.RandomSeed()) == 111)
+        @test (MOI.get(sampler, RandomSampler.NumberOfReads()) == 500)
 
 
-        @test (MOI.get(sampler, RandomSampler.RandomBias()) == 0.9)
+        @test (MOI.get(sampler, RandomSampler.RandomSeed()) === nothing)
+
+        MOI.set(sampler, RandomSampler.RandomSeed(), 0)
+
+        @test (MOI.get(sampler, RandomSampler.RandomSeed()) == 0)
+
+        @test (MOI.get(sampler, RandomSampler.RandomBias()) == 0.5)
 
         MOI.set(sampler, RandomSampler.RandomBias(), 0.75)
 

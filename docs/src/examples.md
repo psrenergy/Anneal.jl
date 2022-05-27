@@ -22,9 +22,3 @@ for i = 1:result_count(model)
       println("f($xi) = $yi")
 end
 ```
-
-## Optimizer Settings
-```@example simple-qubo
-set_optimizer_parameter(model, SimulatedAnnealer.NumberOfReads(), 500)
-get_optimizer_parameter(model, SimulatedAnnealer.NumberOfReads())
-```

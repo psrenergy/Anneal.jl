@@ -12,17 +12,17 @@ function __init__()
 end
 
 function Anneal.sample(annealer::Optimizer{T}) where {T}
-    sampler = neal.SimulatedAnnealingSampler()
+    # sampler = neal.SimulatedAnnealingSampler()
 
-    t₀ = time()
-    samples = [(pyconvert.(Int, s), pyconvert(Int, n), pyconvert(Float64, e + annealer.c)) for (s, e, n) ∈ sampler.sample_qubo(
-        annealer.Q;
-        num_reads=annealer.settings[NumberOfReads()],
-        num_sweeps=annealer.settings[NumberOfSweeps()],
-    ).record]
-    t₁ = time()
+    # t₀ = time()
+    # samples = [(pyconvert.(Int, s), pyconvert(Int, n), pyconvert(Float64, e + annealer.c)) for (s, e, n) ∈ sampler.sample_qubo(
+    #     annealer.Q;
+    #     num_reads=annealer.settings[NumberOfReads()],
+    #     num_sweeps=annealer.settings[NumberOfSweeps()],
+    # ).record]
+    # t₁ = time()
 
-    δt = t₁ - t₀
+    # δt = t₁ - t₀
 
-    return (samples, δt)
+    # return (samples, δt)
 end

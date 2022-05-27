@@ -1,43 +1,123 @@
-function anew_error(item::Any)
-    error("Invalid usage of @anew: '$item'")
+function anew_error(msg::String)
+    error("Invalid usage of @anew: $msg")
 end
 
+@doc raw"""
+```
+Anneal.@anew begin
+    # -*- Valid Syntax -*-
+    "num_reads" = 1_000
+    "num_reads"::Integer = 1_000
+    NumberOfReads = 1_000
+    NumberOfReads::Integer = 1_000
+    NumberOfReads("num_reads") = 1_000
+    NumberOfReads("num_reads")::Integer = 1_000
+end
+```
+"""
 macro anew(expr)
     expr = macroexpand(__module__, expr)
 
     if !(expr isa Expr && expr.head === :block)
-        anew_error(expr)
+        anew_error("missing begin ... end block")
     end
 
-    attrs = Symbol[]
-    hints = Tuple{Symbol,Any,Any}[]
+    attrs = Dict{Symbol,Any}[]
 
-    for stmt in expr.args
-        if stmt isa LineNumberNode
-            continue
-        elseif stmt isa Expr
-            if stmt.head === :(::) && stmt.args[1] isa Symbol
-                attr, type = stmt.args
-                push!(attrs, (attr))
-                push!(hints, (attr, hint, :Any))
-                continue
-            elseif stmt.head === :(=)
-                stmt, hint = stmt.args
-                if stmt isa Expr && stmt.head == :(::) && stmt.args[1] isa Symbol
-                    attr, type = stmt.args
-                    push!(attrs, (attr))
-                    push!(hints, (attr, hint, type))
-                    continue
-                end
-            end
+    for stmt in filter(line -> !(line isa LineNumberNode), expr.args)
+        if !(stmt isa Expr && stmt.head === :(=))
+            anew_error("no default value provided in '$stmt'")
         end
 
-        anew_error(stmt)
+        item, init = stmt.args
+
+        attr = if item isa Symbol
+            Dict{Symbol,Any}(
+                :raw => nothing,
+                :attr => item,
+                :init => init,
+                :type => :Any,
+            )
+        elseif item isa String
+            Dict{Symbol,Any}(
+                :raw => item,
+                :attr => nothing,
+                :init => init,
+                :type => :Any,
+            )
+        elseif item isa Expr && item.head === :(::)
+            code, type = item.args
+
+            if code isa Symbol
+                Dict{Symbol,Any}(
+                    :raw => nothing,
+                    :attr => code,
+                    :init => init,
+                    :type => type,
+                )
+            elseif code isa String
+                Dict{Symbol,Any}(
+                    :raw => code,
+                    :attr => nothing,
+                    :init => init,
+                    :type => type,
+                )
+            elseif code isa Expr && code.head === :call
+                name, raw = code.args
+                if name isa Symbol && raw isa String
+                    Dict{Symbol,Any}(
+                        :raw => raw,
+                        :attr => name,
+                        :init => init,
+                        :type => type,
+                    )
+                else
+                    anew_error("invalid attribute identifier '$name($raw)'")
+                end
+            else
+                anew_error("invalid attribute identifier '$code'")
+            end
+        elseif item isa Expr && item.head === :call
+            name, raw = item.args
+            if name isa Symbol && raw isa String
+                Dict{Symbol,Any}(
+                    :raw => raw,
+                    :attr => name,
+                    :init => init,
+                    :type => :Any,
+                )
+            else
+                anew_error("invalid attribute identifier '$name($raw)'")
+            end
+        else
+            anew_error("invalid attribute signature '$item'")
+        end
+
+        push!(attrs, attr)
     end
 
-    quote
-        $((:(struct $(attr) <: AbstractSamplerAttribute end) for attr in attrs)...)
+    blocks = Expr[]
 
+    defaults = Expr[]
+
+    for attr in attrs
+        if !isnothing(attr[:attr])
+            push!(blocks, quote
+                struct $(attr[:attr]) <: AbstractSamplerAttribute end
+            end)
+        end
+
+        push!(defaults, quote
+            Dict{Symbol,Any}(
+                :raw  => $(esc(attr[:raw])),
+                :attr => $(esc(attr[:attr])),
+                :init => $(esc(attr[:init])),
+                :type => $(esc(attr[:type])),
+            )
+        end)
+    end
+
+    push!(blocks, quote
         mutable struct Optimizer{T} <: AbstractSampler{T}
             x::Dict{MOI.VariableIndex,Maybe{Int}}
             y::Dict{Int,MOI.VariableIndex}
@@ -47,10 +127,10 @@ macro anew(expr)
 
             sample_set::SampleSet{Int,T}
             moi::SamplerMOI{T}
-            settings::Dict{Any,Any}
+            attrs::SamplerAttributes
 
-            function Optimizer{T}(kws::Pair{<:MOI.AbstractOptimizerAttribute,<:Any}...) where {T}
-                optimizer = new{T}(
+            function Optimizer{T}() where {T}
+                new{T}(
                     Dict{MOI.VariableIndex,Union{Int,Nothing}}(),
                     Dict{Int,MOI.VariableIndex}(),
                     Dict{Tuple{Int,Int},T}(),
@@ -58,21 +138,17 @@ macro anew(expr)
                     0,
                     SampleSet{Int,T}(),
                     SamplerMOI{T}(),
-                    Dict{Any,Any}($((:($(esc(attr))() => convert($(esc(type)), $(esc(hint)))) for (attr, hint, type) in hints)...), kws...),
+                    SamplerAttributes(Dict{Symbol,Any}[$(defaults...)]),
                 )
-
-                # Register raw optimizer attributes
-                merge!(
-                    optimizer.moi.raw_optimizer_attributes,
-                    Dict{Symbol, Any}(nameof(typeof(attr)) => attr for attr in keys(optimizer.settings))
-                )
-
-                return optimizer
             end
 
-            function Optimizer(kws::Pair{<:MOI.AbstractOptimizerAttribute,<:Any}...)
-                return Optimizer{Float64}(kws...)
+            function Optimizer()
+                Optimizer{Float64}()
             end
         end
+    end)
+
+    quote
+        $(blocks...)
     end
 end

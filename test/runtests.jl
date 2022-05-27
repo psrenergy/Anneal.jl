@@ -14,4 +14,4 @@ include("samplers/identity.jl")
 include("samplers/random.jl")
 
 # -*- Annealers -*-
-include("annealers/simulated.jl")
+# include("annealers/simulated.jl")
