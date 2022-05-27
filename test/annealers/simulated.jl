@@ -1,22 +1,19 @@
 @testset "Simulated Annealing" begin
     @testset "Regular UI + Attributes" begin
-        annealer = SimulatedAnnealer.Optimizer{Float64}(
-            SimulatedAnnealer.NumberOfReads()  => 500,
-            SimulatedAnnealer.NumberOfSweeps() => 500,
-        )
+        annealer = SimulatedAnnealer.Optimizer{Float64}()
 
         # -*- Attributes -*-
-        @test (MOI.get(annealer, SimulatedAnnealer.NumberOfSweeps()) == 500)
-
-        MOI.set(annealer, SimulatedAnnealer.NumberOfSweeps(), 1_000)
-
         @test (MOI.get(annealer, SimulatedAnnealer.NumberOfSweeps()) == 1_000)
 
-        @test (MOI.get(annealer, SimulatedAnnealer.NumberOfReads()) == 500)
+        MOI.set(annealer, SimulatedAnnealer.NumberOfSweeps(), 500)
 
-        MOI.set(annealer, SimulatedAnnealer.NumberOfReads(), 1_000)
+        @test (MOI.get(annealer, SimulatedAnnealer.NumberOfSweeps()) == 500)
 
         @test (MOI.get(annealer, SimulatedAnnealer.NumberOfReads()) == 1_000)
+
+        MOI.set(annealer, SimulatedAnnealer.NumberOfReads(), 500)
+
+        @test (MOI.get(annealer, SimulatedAnnealer.NumberOfReads()) == 500)
 
         # -*- Model -*-
         @test (MOI.is_empty(annealer) == true)
