@@ -57,7 +57,7 @@ function Base.empty!(attrs::SamplerAttributes)
     for attr in attrs.defaults
         if !isnothing(attr[:attr]) && !isnothing(attr[:raw]) # Complete interface
             # Set fallback
-            attrs.fallback[attr[:attr]] = attr[:raw]
+            attrs.fallback[attr[:attr]()] = attr[:raw]
 
             # Add raw attribute
             attrs.raw_attr[attr[:raw]] = attr[:init]
@@ -72,10 +72,10 @@ function Base.empty!(attrs::SamplerAttributes)
             attrs.raw_type[attr[:raw]] = attr[:type]
         elseif !isnothing(attr[:attr]) # Optimizer attribute
             # Add optimizer attribute
-            attrs.opt_attr[attr[:attr]] = attr[:init]
+            attrs.opt_attr[attr[:attr]()] = attr[:init]
 
             # Add optimizer type
-            attrs.opt_type[attr[:attr]] = attr[:type]
+            attrs.opt_type[attr[:attr]()] = attr[:type]
         else
             error("Invalid sampler attribute settings")
         end
