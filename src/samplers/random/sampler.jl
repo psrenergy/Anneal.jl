@@ -21,7 +21,7 @@ function Anneal.sample(sampler::Optimizer)
     rng = Rng(seed)
 
     t₀ = time()
-    samples = [random_sample(sampler, rng, θ) for _ = 1:MOI.get(sampler, NumberOfReads())]
+    samples = [random_sample(sampler, rng, bias) for _ = 1:MOI.get(sampler, NumberOfReads())]
     t₁ = time()
 
     δt = t₁ - t₀
