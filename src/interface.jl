@@ -25,7 +25,7 @@ function energy(sampler::AbstractSampler, s::Vector{Int})
 end
 
 # -*- :: Attributes :: -*-
-abstract type AbstractSamplerAttribute end
+abstract type AbstractSamplerAttribute <: MOI.AbstractOptimizerAttribute end
 
 mutable struct SamplerAttributes
     opt_attr::Dict{Any,Any}
