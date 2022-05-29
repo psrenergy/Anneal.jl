@@ -6,7 +6,10 @@
     </a>
     <br>
     <br>
-    <a href="https://psrenergy.github.com/Anneal.jl/dev">
+    <a href="https://codecov.io/gh/psrenergy/Anneal.jl">
+        <img src="https://codecov.io/gh/psrenergy/Anneal.jl/branch/master/graph/badge.svg?token=729WFU0752"/>
+    </a>
+    <a href="https://psrenergy.github.io/Anneal.jl/dev">
         <img src="https://img.shields.io/badge/docs-dev-blue.svg" alt="Docs">
     </a>
     <a href="https://github.com/psrenergy/Anneal.jl/actions/workflows/ci.yml">
