@@ -11,10 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@latest
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@latest
         with:
           version: '1.6'
-      - uses: julia-actions/julia-buildpkg@latest
+      - name: Develop Anneal.jl
+        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(path=pwd())'
+      - name: Build Package
+        uses: julia-actions/julia-buildpkg@latest
         with: 
             project: "docs/"
       - name: Build and deploy
