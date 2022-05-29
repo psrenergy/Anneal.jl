@@ -22,19 +22,61 @@ In terms of Julia's data structures, we define a *QUBO Normal Form* (NQF) with a
 ```
 where ``x`` provides a mapping between each MathOptInterface's `VariableIndex` and the corresponding integer index in `Q`.
 
-Even though only QUBO formulations are supported as input (mostly due to the lack of backend support for spin variables e.g. ``s \in \{-1, 1\}``), Anneal provides internal tools for working with Ising Model instances since many samplers rely on it.
-Validation and basic conversion is made using the functions below.
-
+Even though only QUBO formulations are supported as input, Anneal provides internal tools for working with Ising Model instances since many samplers rely on it.
+Model validation and trivial QUBO/Insing conversion is made using the functions below.
 ```@docs
 Anneal.isqubo
 Anneal.qubo_normal_form
 Anneal.ising_normal_form
 ```
 
-## Defining a Sampler
+## Defining a new sampler interface
 
-To speed up
+The `Anneal.@anew` macro is available to speed up the interface setup process.
+```@docs
+Anneal.@anew
 ```
 
+Inside a module scope for the new interface, one should call the `Anneal.@anew` macro, specifying the solver's attributes as described in the macro's docs. One must also define `MOI.get` methods for the `MOI.SolverName`, `MOI.RawSolver` and `MOI.SolverVersion` attributes. The last and most important step is to define the `Anneal.sample` method, which returns both a vector with every sample and also the sampling time. The whole standard definition is described in the next example.
 
+```julia
+module SuperAnnealer
+    using Anneal
+
+    Anneal.@anew begin
+        NumberOfReads::Integer = 100
+        SuperAttribute::Any = nothing
+    end # This will define Optimizer{T} <: MOI.AbstractOptimizer
+
+    # -*- MathOptInterface -*-
+    function MOI.get(::Optimizer, MOI.SolverName)
+        "Super Annealer"
+    end
+
+    function MOI.get(::Optimizer, MOI.SolverVersion)
+        v"0.1.0" # Version strings are welcome!
+    end
+
+    function MOI.get(sampler::Optimizer, MOI.RawSolver)
+        # Usually the sampler itself, since we are prtty much low-level here.
+        # If you call another optimizer under the hood, you might want to return it.
+        sampler 
+    end
+
+    function Anneal.sample(sampler::Optimizer)
+        # Is your annealer running on the Ising Model? Have this:
+        s, h, J, c = Anneal.ising_normal_form(sampler.x, sampler.Q, sampler.c)
+
+        n = MOI.get(sampler, NumberOfReads())
+        attr = MOI.get(sampler, SuperAttribute())
+
+        t0 = time()
+        results = [super_sample(h, J, attr) for i = 1:n]
+        t1 = time()
+
+        return (results, t1 - t0)
+    end
+end
 ```
+
+Type assertion for `Anneal.sample`'s return can be done using the `::Tuple{Anneal.SamplerResults, Float64}` query.
