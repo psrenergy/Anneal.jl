@@ -1,6 +1,4 @@
 using Documenter
-using Pkg
-Pkg.develop(path=joinpath(@__DIR__, ".."))
 using Anneal
 
 # Set up to run docstrings with jldoctest
@@ -14,15 +12,15 @@ makedocs(;
     clean=true,
     format=Documenter.HTML(
         assets = ["assets/extra_styles.css"], #, "assets/favicon.ico"],
-        mathengine=Documenter.MathJax2(),
+        mathengine=Documenter.KaTeX(),
         sidebar_sitename=false,
     ), 
     sitename="Anneal.jl",
     authors="Pedro Xavier and Tiago Andrade and Joaquim Garcia and David Bernal",
     pages=[
-        "Home" => "index.md",
-        # "manual.md",
-        # "examples.md",
+        "Home"     => "index.md",
+        "Manual"   => "manual.md",
+        "Examples" => "examples.md",
     ],
     workdir="."
 )

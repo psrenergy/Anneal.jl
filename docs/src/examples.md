@@ -1,13 +1,24 @@
 # Examples
 
-```@example
-import MathOptInterface as MOI
+## Simple QUBO
+```@example simple-qubo
+using JuMP
 using Anneal
 
-annealer = SimulatedAnnealer{MOI.VariableIndex, Float64}()
+model = Model(SimulatedAnnealer.Optimizer)
 
-MOI.set(annealer, NumSweeps, 1000)
-MOI.set(annealer, NumReads, 1000)
+Q = [ 1.0  2.0 -3.0
+      2.0 -1.5 -2.0
+     -3.0 -2.0  0.5 ]
 
-MOI.optimize!(annealer, model)
+@variable(model, x[i = 1:3], Bin)
+@objective(model, Min, x' * Q * x)
+
+optimize!(model)
+
+for i = 1:result_count(model)
+      xi = value.(x; result = i)
+      yi = objective_value(model; result = i)
+      println("f($xi) = $yi")
+end
 ```

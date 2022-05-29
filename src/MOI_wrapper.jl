@@ -91,13 +91,21 @@ end
 
 MOI.supports(::AbstractSampler, ::MOI.TimeLimitSec) = true
 
-# -*- RawOptimizerAttribute (get, set, supports) -*-
-function MOI.get(sampler::AbstractSampler, attr::MOI.RawOptimizerAttribute)
-    return sampler.moi.raw_optimizer_attributes[attr.name]
+function MOI.get(sampler::AbstractSampler, attr::AbstractSamplerAttribute)
+    sampler.attrs[attr]
 end
 
-function MOI.set(sampler::AbstractSampler, attr::MOI.RawOptimizerAttribute, value::Any)
-    sampler.moi.raw_optimizer_attributes[attr.name] = value
+function MOI.set(sampler::AbstractSampler, attr::AbstractSamplerAttribute, value::Any)
+    sampler.attrs[attr] = value
+end
+
+# -*- RawOptimizerAttribute (get, set, supports) -*-
+function MOI.get(sampler::AbstractSampler, raw_attr::MOI.RawOptimizerAttribute)
+    sampler.attrs[raw_attr.name]
+end
+
+function MOI.set(sampler::AbstractSampler, raw_attr::MOI.RawOptimizerAttribute, value::Any)
+    sampler.attrs[raw_attr.name] = value
 end
 
 MOI.supports(::AbstractSampler, ::MOI.RawOptimizerAttribute) = true
