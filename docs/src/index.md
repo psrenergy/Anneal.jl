@@ -72,7 +72,7 @@ end
   month        = {mar},
   year         = {2022},
   publisher    = {Zenodo},
-  version      = {v0.1.0},
+  version      = {v0.1.1},
   doi          = {10.5281/zenodo.6390515},
   url          = {https://doi.org/10.5281/zenodo.6390515}
 }
