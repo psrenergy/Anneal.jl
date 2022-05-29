@@ -142,7 +142,7 @@ end
 @doc raw"""
     ising_normal_form(model::MOI.ModelLike)
     ising_normal_form(T::Type, model::MOI.ModelLike)
-    ising_normal_form(x::Dict{VI, Maybe{Int}}, Q::Dict{Tuple{Int, Int}, T}, c::T) where {T}
+    ising_normal_form(x::Dict{VI, Union{Int, Nothing}}, Q::Dict{Tuple{Int, Int}, T}, c::T) where {T}
 
 Returns a quadruple ``(s, h, J, c)`` where:
 * `s::Dict{MOI.VariableIndex, Union{Int, Nothing}}` maps each of the model's variables to an integer index, to be used when interacting with ``h`` and ``J``.

@@ -1,6 +1,6 @@
 abstract type AbstractSampler{T} <: MOI.AbstractOptimizer end
 
-const SamplerResults = Vector{Tuple{Vector{Int},Int,Float64}}
+const SamplerResults = Vector{Tuple{Vector{<:Integer},Integer,Float64}}
 
 function sample(::AbstractSampler) end
 
