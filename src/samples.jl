@@ -1,11 +1,23 @@
 # -*- Sample & SampleSet -*-
-mutable struct Sample{S<:Any,T<:Any}
-    states::Vector{S}
+mutable struct Sample{S,T}
+    state::Vector{S}
     reads::Int
-    energy::T
+    value::T
+
+    function Sample{S, T}(state::Vector{S}, reads::Integer, value::T) where {S, T}
+        new{S, T}(state, reads, value)
+    end
+
+    function Sample{S, T}(sample::Tuple{Vector{<:S}, Integer, T}) where {S, T}
+        new{S, T}(sample...)
+    end
 end
 
-mutable struct SampleSet{S<:Any,T<:Any}
+function Base.:(==)(x::Sample, y::Sample)
+    (x.state == y.state) && (x.reads == y.reads) && (x.value == y.value)
+end
+
+mutable struct SampleSet{S,T}
     samples::Vector{Sample{S,T}}
     mapping::Dict{Vector{S},Int}
 
@@ -17,7 +29,7 @@ mutable struct SampleSet{S<:Any,T<:Any}
     end
 
     """
-    Guarantees duplicate removal and that samples are ordered by energy (<), reads (>) & states (<).
+    Guarantees duplicate removal and that samples are ordered by value (<), reads (>) & state (<).
     """
     function SampleSet{S,T}(data::Vector{Sample{S,T}}) where {S,T}
         samples = Vector{Sample{S,T}}()
@@ -26,16 +38,16 @@ mutable struct SampleSet{S<:Any,T<:Any}
         i = 1
 
         for sample in data
-            if haskey(mapping, sample.states)
-                samples[mapping[sample.states]].reads += sample.reads
+            if haskey(mapping, sample.state)
+                samples[mapping[sample.state]].reads += sample.reads
             else
                 push!(samples, sample)
-                mapping[sample.states] = i
+                mapping[sample.state] = i
                 i += 1
             end
         end
 
-        I = sortperm(samples, by=(ξ) -> (ξ.energy, -ξ.reads, ξ.states))
+        I = sortperm(samples, by=(ξ) -> (ξ.value, -ξ.reads, ξ.state))
 
         samples = samples[I]
         mapping = Dict{Vector{S},Int}(s => I[i] for (s, i) in mapping)
@@ -44,8 +56,17 @@ mutable struct SampleSet{S<:Any,T<:Any}
     end
 end
 
-Base.isempty(s::SampleSet) = isempty(s.samples)
-Base.length(s::SampleSet) = length(s.samples)
+function Base.:(==)(x::SampleSet, y::SampleSet)
+    x.samples == y.samples
+end
+
+function Base.isempty(s::SampleSet)
+    isempty(s.samples)
+end
+
+function Base.length(s::SampleSet)
+    length(s.samples)
+end
 
 function Base.iterate(s::SampleSet)
     return iterate(s.samples)
@@ -60,27 +81,27 @@ function Base.getindex(s::SampleSet, i::Int)
 end
 
 function Base.merge(x::SampleSet{S,T}, y::SampleSet{S,T}) where {S,T}
-    return SampleSet{S,T}(Vector{Sample{S,T}}([x.samples; y.samples]))
+    return SampleSet{S,T}(Sample{S,T}[x.samples; y.samples])
 end
 
 function Base.merge!(x::SampleSet{S,T}, y::SampleSet{S,T}) where {S,T}
     i = length(x.samples)
 
     for sample in y.samples
-        if haskey(x.mapping, sample.states)
-            x.samples[x.mapping[sample.states]].reads += sample.reads
+        if haskey(x.mapping, sample.state)
+            x.samples[x.mapping[sample.state]].reads += sample.reads
         else
             push!(x.samples, sample)
-            i = x.mapping[sample.states] = i + 1
+            i = x.mapping[sample.state] = i + 1
         end
     end
 
-    I = sortperm(x.samples, by=(ξ) -> (ξ.energy, -ξ.reads, ξ.states))
+    I = sortperm(x.samples, by=(ξ) -> (ξ.value, -ξ.reads, ξ.state))
 
     x.samples = x.samples[I]
     x.mapping = Dict{Vector{S},Int}(s => I[i] for (s, i) in x.mapping)
 
-    nothing
+    x
 end
 
 function Base.empty!(s::SampleSet)

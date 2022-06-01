@@ -22,7 +22,7 @@ export SimulatedAnnealer
 # -*- Includes: Anneal -*-
 include("error.jl")
 include("tools.jl")
-include("sampleset.jl")
+include("samples.jl")
 include("interface.jl")
 include("MOI_wrapper.jl")
 include("macros.jl")

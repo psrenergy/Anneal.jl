@@ -185,7 +185,7 @@ function MOI.get(sampler::AbstractSampler{T}, ov::MOI.ObjectiveValue) where {T}
         throw(MOI.ResultIndexBoundsError(ov, n))
     end
 
-    e = sampler.sample_set[j].energy
+    e = sampler.sample_set[j].value
 
     if sampler.moi.objective_sense === MOI.MIN_SENSE
         return e
@@ -236,7 +236,7 @@ function MOI.get(sampler::AbstractSampler{T}, vp::MOI.VariablePrimal, vi::MOI.Va
     if isnothing(i)
         return zero(T)
     else
-        return convert(T, sampler.sample_set[j].states[i])
+        return convert(T, sampler.sample_set[j].state[i])
     end
 end
 
