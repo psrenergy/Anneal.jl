@@ -1,5 +1,15 @@
 @testset "Simulated Annealing" begin
-    @testset "Regular UI + Attributes" begin
+    @testset "MOI Attributes" begin
+        annealer = SimulatedAnnealer.Optimizer{Float64}()
+
+        @test MOI.get(annealer, MOI.SolverName()) === "D-Wave Neal"
+
+        @test MOI.get(annealer, MOI.SolverVersion()) >= v"0.5.8"
+
+        @test MOI.get(annealer, MOI.RawSolver()) === annealer
+    end
+
+    @testset "MOI Regular UI + MOI Attributes" begin
         annealer = SimulatedAnnealer.Optimizer{Float64}()
 
         # -*- Attributes -*-
@@ -61,7 +71,7 @@
         @test (MOI.is_empty(annealer) == true)
     end # testset
 
-    @testset "MOI UI" begin
+    @testset "MOI instantiate UI + MOI Attributes" begin
         model = MOI.instantiate(SimulatedAnnealer.Optimizer, with_bridge_type = Float64)
     
         # -*- Model -*-
@@ -97,7 +107,7 @@
         @test MOI.get(model, MOI.ObjectiveValue()) ≈ 2.2
     end
     
-    @testset "MOI UI + Extra Variable" begin
+    @testset "MOI Instantiate UI + Extra Variable" begin
         model = MOI.instantiate(SimulatedAnnealer.Optimizer, with_bridge_type = Float64)
     
         # -*- Model -*-
@@ -124,4 +134,6 @@
         @test MOI.get.(model, MOI.VariablePrimal(), x[1:3]) == [1, 1, 0]
         @test MOI.get(model, MOI.ObjectiveValue()) ≈ 2.2
     end
+
+    
 end

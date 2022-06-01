@@ -7,6 +7,9 @@ const MOIU = MOI.Utilities
 
 # -*- QUBO Models -*-
 include("qubo.jl")
+include("error.jl")
+include("tools.jl")
+include("samples.jl")
 
 # -*- Samplers -*-
 include("samplers/exact.jl")

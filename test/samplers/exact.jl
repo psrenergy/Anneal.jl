@@ -1,5 +1,15 @@
 @testset "Exact Sampling" begin
-    @testset "Regular UI + Attributes" begin
+    @testset "MOI Attributes" begin
+        sampler = ExactSampler.Optimizer{Float64}()
+
+        @test MOI.get(sampler, MOI.SolverName()) === "Exact Sampler"
+
+        @test MOI.get(sampler, MOI.SolverVersion()) >= v"1.0.0"
+
+        @test MOI.get(sampler, MOI.RawSolver()) === sampler
+    end
+
+    @testset "MOI Regular UI + MOI Attributes" begin
         sampler = ExactSampler.Optimizer{Float64}()
 
         # -*- Model -*-
@@ -48,7 +58,7 @@
         @test (MOI.is_empty(sampler) == true)
     end # testset
 
-    @testset "MOI UI" begin
+    @testset "MOI Instantiate UI" begin
         model = MOI.instantiate(ExactSampler.Optimizer, with_bridge_type = Float64)
     
         # -*- Model -*-
@@ -76,7 +86,7 @@
         @test MOI.get(model, MOI.ObjectiveValue()) ≈ 2.2
     end
     
-    @testset "MOI UI + Extra Variable" begin
+    @testset "MOI Instantiate UI + Extra Variable" begin
         model = MOI.instantiate(ExactSampler.Optimizer, with_bridge_type = Float64)
     
         # -*- Model -*-

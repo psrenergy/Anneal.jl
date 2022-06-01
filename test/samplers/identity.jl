@@ -1,4 +1,14 @@
 @testset "Identity Sampling" begin
+    @testset "MOI Attributes" begin
+        sampler = IdentitySampler.Optimizer{Float64}()
+
+        @test MOI.get(sampler, MOI.SolverName()) === "Identity Sampler"
+
+        @test MOI.get(sampler, MOI.SolverVersion()) >= v"1.0.0"
+
+        @test MOI.get(sampler, MOI.RawSolver()) === sampler
+    end
+
     @testset "Regular UI + Attributes" begin
         sampler = IdentitySampler.Optimizer{Float64}()
 

@@ -21,7 +21,7 @@ function sample!(sampler::AbstractSampler{T}) where {T}
 end
 
 function energy(sampler::AbstractSampler, s::Vector{Int})
-    return sum(s[i] * s[j] * Qᵢⱼ for ((i, j), Qᵢⱼ) in sampler.Q; init=sampler.c)
+    sum(s[i] * s[j] * Qᵢⱼ for ((i, j), Qᵢⱼ) in sampler.Q; init=sampler.c)
 end
 
 # -*- :: Attributes :: -*-

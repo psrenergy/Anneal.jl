@@ -1,4 +1,14 @@
 @testset "Random Sampling" begin
+    @testset "MOI Attributes" begin
+        sampler = RandomSampler.Optimizer{Float64}()
+
+        @test MOI.get(sampler, MOI.SolverName()) === "Random Sampler"
+
+        @test MOI.get(sampler, MOI.SolverVersion()) >= v"1.0.0"
+
+        @test MOI.get(sampler, MOI.RawSolver()) === sampler
+    end
+
     @testset "Regular UI + Attributes" begin
         sampler = RandomSampler.Optimizer{Float64}()
 
