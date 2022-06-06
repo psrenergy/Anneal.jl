@@ -11,10 +11,14 @@ include("error.jl")
 include("tools.jl")
 include("samples.jl")
 
-# -*- Samplers -*-
+include("interface/moi.jl")
+include("interface/jump.jl")
+include("interface/anneal.jl")
+
+# -*- Utility Samplers -*-
 include("samplers/exact.jl")
 include("samplers/identity.jl")
 include("samplers/random.jl")
 
-# -*- Annealers -*-
-include("annealers/simulated.jl")
+# -*- Bundled Samplers -*-
+include("samplers/simulated.jl")

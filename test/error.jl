@@ -1,7 +1,6 @@
 @testset "Error Messages" begin
     io = IOBuffer()
 
-
     error_msg = "Error Message!"
 
     showerror(io, Anneal.AnnealingError(error_msg))

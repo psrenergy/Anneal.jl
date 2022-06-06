@@ -1,4 +1,8 @@
 @testset "Random Sampling" begin
+    @testset "Interface Check" begin
+        test_anneal(RandomSampler.Optimizer)
+    end
+
     @testset "MOI Attributes" begin
         sampler = RandomSampler.Optimizer{Float64}()
 

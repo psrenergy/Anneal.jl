@@ -1,4 +1,8 @@
 @testset "Exact Sampling" begin
+    @testset "Interface Check" begin
+        test_anneal(ExactSampler.Optimizer)
+    end
+
     @testset "MOI Attributes" begin
         sampler = ExactSampler.Optimizer{Float64}()
 

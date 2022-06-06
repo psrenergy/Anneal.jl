@@ -49,7 +49,7 @@ function MOI.optimize!(sampler::AbstractSampler, model::MOI.ModelLike)
 end
 
 function Base.show(io::IO, ::AbstractSampler)
-    Base.print(io, "An sampler for QUBO Models")
+    Base.print(io, "A sampler for QUBO Models")
 end
 
 # -*- :: -*- Constraint Support -*- :: -*-
@@ -115,7 +115,7 @@ function MOI.get(sampler::AbstractSampler, ::MOI.NumberOfThreads)
     return sampler.moi.number_of_threads
 end
 
-function MOI.set(sampler::AbstractSampler, ::MOI.NumberOfThreads, n::Int)
+function MOI.set(sampler::AbstractSampler, ::MOI.NumberOfThreads, n::Integer)
     sampler.moi.number_of_threads = n
 end
 
@@ -250,9 +250,9 @@ function MOI.get(sampler::AbstractSampler, ::MOI.VariablePrimalStart, vi::MOI.Va
     if !haskey(sampler.x, vi)
         throw(MOI.InvalidIndex{MOI.VariableIndex}(vi))
     elseif haskey(sampler.moi.variable_primal_start, vi)
-        return sampler.moi.variable_primal_start[vi]
+        sampler.moi.variable_primal_start[vi]
     else
-        return nothing
+        nothing
     end
 end
 
@@ -271,25 +271,25 @@ end
 MOI.supports(::AbstractSampler, ::MOI.VariablePrimalStart, ::Type{<:MOI.VariableIndex}) = true
 
 function MOI.get(::AbstractSampler, ::MOI.VariableName, v::VI)
-    return "v[$(v.value)]"
+    "v[$(v.value)]"
 end
 
 function MOI.get(::AbstractSampler, ::MOI.ListOfConstraintTypesPresent)
-    return [(VI, MOI.ZeroOne)]
+    [(VI, MOI.ZeroOne)]
 end
 
 function MOI.get(sampler::AbstractSampler, ::MOI.ListOfConstraintIndices{VI, MOI.ZeroOne})
-    return CI{VI, MOI.ZeroOne}[CI{VI, MOI.ZeroOne}(xᵢ.value) for xᵢ ∈ MOI.get(sampler, MOI.ListOfVariableIndices())]
+    CI{VI, MOI.ZeroOne}[CI{VI, MOI.ZeroOne}(xᵢ.value) for xᵢ ∈ MOI.get(sampler, MOI.ListOfVariableIndices())]
 end
 
 function MOI.get(sampler::AbstractSampler, ::MOI.ListOfVariableIndices)
-    return VI[xᵢ for xᵢ ∈ keys(sampler.x)]
+    VI[xᵢ for xᵢ ∈ keys(sampler.x)]
 end
 
 function MOI.get(::AbstractSampler, ::MOI.ConstraintFunction, i::CI{VI, MOI.ZeroOne})
-    return VI(i.value)
+    VI(i.value)
 end
 
 function MOI.get(::AbstractSampler, ::MOI.ConstraintSet, i::CI{VI, MOI.ZeroOne})
-    return MOI.ZeroOne()
+    MOI.ZeroOne()
 end
