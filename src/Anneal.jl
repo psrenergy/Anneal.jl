@@ -20,24 +20,17 @@ export ExactSampler, RandomSampler, IdentitySampler
 export SimulatedAnnealer
 
 # -*- Includes: Anneal -*-
-include("error.jl")
-include("tools.jl")
-include("samples.jl")
-include("interface.jl")
-include("MOI_wrapper.jl")
-include("macros.jl")
+include(joinpath("lib", "error.jl"))
+include(joinpath("lib", "tools.jl"))
+include(joinpath("lib", "samples.jl"))
+include(joinpath("interface", "interface.jl"))
+include(joinpath("interface", "MOI_wrapper.jl"))
+include(joinpath("interface", "macros.jl"))
 
 # -*- Includes: Submodules -*-
-include("samplers/random/random.jl")
-using .RandomSampler
-
-include("samplers/exact/exact.jl")
-using .ExactSampler
-
-include("samplers/identity/identity.jl")
-using .IdentitySampler
-
-include("annealers/simulated/simulated.jl")
-using .SimulatedAnnealer
+include(joinpath("samplers", "random", "random.jl"))
+include(joinpath("samplers", "exact", "exact.jl"))
+include(joinpath("samplers", "identity", "identity.jl"))
+include(joinpath("samplers", "simulated", "simulated.jl"))
 
 end # module
