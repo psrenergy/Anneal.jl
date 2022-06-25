@@ -1,13 +1,3 @@
-export AnnealingError
-
-struct AnnealingError <: Exception
-    msg::String
-end
-
-function Base.showerror(io::IO, e::AnnealingError)
-    print(io, e.msg)
-end
-
 struct QUBOError <: Exception
     msg::Union{Nothing, String}
 
@@ -18,9 +8,12 @@ end
 
 function Base.showerror(io::IO, e::QUBOError)
     if isnothing(e.msg)
-        print(io, """The current model could not be converted to QUBO in a straightforward fashion.
+        print(io,
+        """
+        The current model could not be converted to QUBO in a straightforward fashion.
         Consider using the ToQUBO.jl package for a sophisticated conversion framework:
-            pkg> add ToQUBO""")
+            pkg> add ToQUBO
+        """)
     else
         print(io, e.msg)
     end

@@ -1,7 +1,5 @@
 @testset "Simulated Annealing" begin
-    @testset "Interface Check" begin
-        test_anneal(SimulatedAnnealer.Optimizer)
-    end
+    Anneal.@test SimulatedAnnealer.Optimizer
 
     @testset "MOI Attributes" begin
         annealer = SimulatedAnnealer.Optimizer{Float64}()

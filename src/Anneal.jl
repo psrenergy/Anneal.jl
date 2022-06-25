@@ -12,8 +12,10 @@ const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 const Maybe{T} = Union{T, Nothing}
 
+import Test
+
 # -*- Exports: Interface -*-
-export MOI, AbstractSampler, AbstractSamplerAttribute, @anew
+export AbstractSampler, AbstractSamplerAttribute, @anew
 
 # -*- Exports: Submodules -*-
 export ExactSampler, RandomSampler, IdentitySampler
@@ -26,6 +28,7 @@ include(joinpath("lib", "samples.jl"))
 include(joinpath("interface", "interface.jl"))
 include(joinpath("interface", "MOI_wrapper.jl"))
 include(joinpath("interface", "macros.jl"))
+include(joinpath("interface", "tests.jl"))
 
 # -*- Includes: Submodules -*-
 include(joinpath("samplers", "random", "random.jl"))

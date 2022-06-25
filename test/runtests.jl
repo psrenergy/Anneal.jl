@@ -13,7 +13,6 @@ include("samples.jl")
 
 include("interface/moi.jl")
 include("interface/jump.jl")
-include("interface/anneal.jl")
 
 # -*- Utility Samplers -*-
 include("samplers/exact.jl")
