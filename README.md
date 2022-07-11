@@ -51,7 +51,7 @@ julia> import Pkg; Pkg.add("Anneal")
 using JuMP
 using Anneal
 
-model = Model(SimulatedAnnealer.Optimizer)
+model = Model(ExactSampler.Optimizer)
 
 Q = [ 1.0  2.0 -3.0
       2.0 -1.5 -2.0
@@ -69,12 +69,7 @@ for i = 1:result_count(model)
 end
 ```
 
-## Supported Annealers & Samplers
-
-### Annealing Wrappers
-| Module Name         | Descripition                                                   | Package                                             | Status |
-| :------------------ | :------------------------------------------------------------- | :-------------------------------------------------- | :----: |
-| `SimulatedAnnealer` | Wrapper around D-Wave Neal simulated annealing Python package. | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
+## Exported Samplers
 
 ### Utility Samplers
 | Module Name       | Descripition                                                                                                                                               | Package                                             | Status |

@@ -116,7 +116,7 @@ function qubo_normal_form(T::Type, model::MOI.ModelLike)
         c += f.constant
     end
 
-    x = Dict{VI,Maybe{Int}}()
+    x = Dict{VI,Union{Int, Nothing}}()
     i = 0
 
     for xᵢ ∈ u
@@ -152,7 +152,7 @@ Returns a quadruple ``(s, h, J, c)`` where:
 """
 function ising_normal_form end
 
-function ising_normal_form(x::Dict{VI,Maybe{Int}}, Q::Dict{Tuple{Int,Int},T}, c::T) where {T}
+function ising_normal_form(x::Dict{VI,Union{Int, Nothing}}, Q::Dict{Tuple{Int,Int},T}, c::T) where {T}
     h = Dict{Int,T}()
     J = Dict{Tuple{Int,Int},T}()
 

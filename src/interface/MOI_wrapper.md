@@ -9,32 +9,32 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 ## Optimizer Interface
 | Method                                        | Status |
 | :-------------------------------------------- | :----: |
-| `MOI.empty!(::Optimizer)`                     |   ✔️    |
-| `MOI.is_empty(::Optimizer)::Bool`             |   ✔️    |
-| `MOI.optimize!(::Optimizer, ::MOI.ModelLike)` |   ✔️    |
-| `Base.show(::IO, ::Optimizer)`                |   ✔️    |
+| `MOI.empty!(::Optimizer)`                     |   ❌    |
+| `MOI.is_empty(::Optimizer)::Bool`             |   ❌    |
+| `MOI.optimize!(::Optimizer, ::MOI.ModelLike)` |   ❌    |
+| `Base.show(::IO, ::Optimizer)`                |   ❌    |
 
 ## Constraint Support
 | Method                                                              | Status |
 | :------------------------------------------------------------------ | :----: |
-| `MOI.supports_constraint(::Optimizer, ::F, ::S)::Bool where {F, S}` |   ✔️    |
+| `MOI.supports_constraint(::Optimizer, ::F, ::S)::Bool where {F, S}` |   ❌    |
 
 ## Attributes
 | Property                    | Type      | `get` | `set` | `supports` |
 | :-------------------------- | :-------- | :---: | :---: | :--------: |
-| `MOI.SolverName`            | `String`  |   ✔️   |   -   |     -      |
-| `MOI.SolverVersion`         | `String`  |   ✔️   |   -   |     -      |
-| `MOI.RawSolver`             | `String`  |   ✔️   |   -   |     -      |
-| `MOI.Name`                  | `String`  |   ✔️   |   ✔️   |     ✔️      |
-| `MOI.Silent`                | `Bool`    |   ✔️   |   ✔️   |     ✔️      |
-| `MOI.TimeLimitSec`          | `Float64` |   ✔️   |   ✔️   |     ✔️      |
-| `MOI.RawOptimizerAttribute` | `Any`     |   ✔️   |   ✔️   |     ✔️      |
-| `MOI.NumberOfThreads`       | `Int`     |   ✔️   |   ✔️   |     ✔️      |
+| `MOI.SolverName`            | `String`  |   ❌   |   -   |     -      |
+| `MOI.SolverVersion`         | `String`  |   ❌   |   -   |     -      |
+| `MOI.RawSolver`             | `String`  |   ❌   |   -   |     -      |
+| `MOI.Name`                  | `String`  |   ❌   |   ❌   |     ❌      |
+| `MOI.Silent`                | `Bool`    |   ❌   |   ❌   |     ❌      |
+| `MOI.TimeLimitSec`          | `Float64` |   ❌   |   ❌   |     ❌      |
+| `MOI.RawOptimizerAttribute` | `Any`     |   ❌   |   ❌   |     ❌      |
+| `MOI.NumberOfThreads`       | `Int`     |   ❌   |   ❌   |     ❌      |
 
 ## The `copy_to` interface 
 | Method                                      | Status |
 | :------------------------------------------ | :----: |
-| `MOI.copy_to(::Optimizer, ::MOI.ModelLike)` |   ✔️    |
+| `MOI.copy_to(::Optimizer, ::MOI.ModelLike)` |   ❌    |
 
 ## Names
 | Property             | Type     | `get` | `set` | `supports` |
@@ -46,17 +46,17 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 | Property                | Type                        | `get` | `set` | `supports` |
 | :---------------------- | :-------------------------- | :---: | :---: | :--------: |
 | `MOI.DualStatus`        | `MOI.ResultStatusCode`      |   ❌   |   -   |     -      |
-| `MOI.PrimalStatus`      | `MOI.ResultStatusCode`      |   ✔️   |   -   |     -      |
-| `MOI.RawStatusString`   | `String`                    |   ✔️   |   -   |     -      |
-| `MOI.ResultCount`       | `Int`                       |   ✔️   |   -   |     -      |
-| `MOI.TerminationStatus` | `MOI.TerminationStatusCode` |   ✔️   |   -   |     -      |
-| `MOI.ObjectiveValue`    | `T`                         |   ✔️   |   -   |     -      |
-| `MOI.SolveTimeSec`      | `Float64`                   |   ✔️   |   -   |     -      |
-| `MOI.VariablePrimal`    | `T`                         |   ✔️   |   -   |     -      |
+| `MOI.PrimalStatus`      | `MOI.ResultStatusCode`      |   ❌   |   -   |     -      |
+| `MOI.RawStatusString`   | `String`                    |   ❌   |   -   |     -      |
+| `MOI.ResultCount`       | `Int`                       |   ❌   |   -   |     -      |
+| `MOI.TerminationStatus` | `MOI.TerminationStatusCode` |   ❌   |   -   |     -      |
+| `MOI.ObjectiveValue`    | `T`                         |   ❌   |   -   |     -      |
+| `MOI.SolveTimeSec`      | `Float64`                   |   ❌   |   -   |     -      |
+| `MOI.VariablePrimal`    | `T`                         |   ❌   |   -   |     -      |
 
 | Property                | Type | `get` | `set` | `supports` |
 | :---------------------- | :--- | :---: | :---: | :--------: |
-| `MOI.ObjectiveFunction` | -    |   -   |   -   |     ✔️      |
+| `MOI.ObjectiveFunction` | -    |   -   |   -   |     ❌      |
 
 ## Integer Solver
 | Property             | Type | `get` | `set` | `supports` |
@@ -72,7 +72,7 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 ## Solver-specific attributes
 | Property        | Type  | `get` | `set` | `supports` |
 | :-------------- | :---- | :---: | :---: | :--------: |
-| `NumberOfReads` | `Int` |   ✔️   |   ✔️   |     -      |
+| `NumberOfReads` | `Int` |   ❌   |   ❌   |     -      |
 
 ## Key
 | Symbol | Meaning                 |

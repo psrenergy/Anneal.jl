@@ -1,5 +1,6 @@
 module Anneal
 
+using BQPIO
 using MathOptInterface
 const MOI = MathOptInterface
 const MOIU = MOI.Utilities
@@ -10,30 +11,26 @@ const SAF{T} = MOI.ScalarAffineFunction{T}
 const SAT{T} = MOI.ScalarAffineTerm{T}
 const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
-const Maybe{T} = Union{T, Nothing}
 
 import Test
 
 # -*- Exports: Interface -*-
-export AbstractSampler, AbstractSamplerAttribute, @anew
+export AbstractSampler, @anew
 
 # -*- Exports: Submodules -*-
 export ExactSampler, RandomSampler, IdentitySampler
-export SimulatedAnnealer
 
 # -*- Includes: Anneal -*-
-include(joinpath("lib", "error.jl"))
-include(joinpath("lib", "tools.jl"))
-include(joinpath("lib", "samples.jl"))
-include(joinpath("interface", "interface.jl"))
-include(joinpath("interface", "MOI_wrapper.jl"))
-include(joinpath("interface", "macros.jl"))
-include(joinpath("interface", "tests.jl"))
+include("lib/error.jl")
+include("lib/tools.jl")
+include("interface/interface.jl")
+include("interface/MOI_wrapper.jl")
+# include("interface/macros.jl")
+# include("interface/tests.jl")
 
 # -*- Includes: Submodules -*-
-include(joinpath("samplers", "random", "random.jl"))
-include(joinpath("samplers", "exact", "exact.jl"))
-include(joinpath("samplers", "identity", "identity.jl"))
-include(joinpath("samplers", "simulated", "simulated.jl"))
+include("samplers/random/RandomSampler.jl")
+# include("samplers/exact/exact.jl")
+# include("samplers/identity/identity.jl")
 
 end # module

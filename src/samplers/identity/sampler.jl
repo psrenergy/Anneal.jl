@@ -4,7 +4,7 @@ Anneal.@anew begin end;
 function identity_sample(sampler::Optimizer{T}) where {T}
     s = Vector{Int}(undef, sampler.n)
 
-    for (xᵢ, i) ∈ sampler.x
+    for (xᵢ, i) in BQPIO.variable_map(sampler)
         if isnothing(i)
             continue
         end
@@ -18,12 +18,21 @@ function identity_sample(sampler::Optimizer{T}) where {T}
 end
 
 # -*- :: Identity Sampler :: -*-
-function Anneal.sample(sampler::Optimizer)
+function Anneal.sample(sampler::Optimizer{T}) where T
     t₀ = time()
     samples = [identity_sample(sampler)]
     t₁ = time()
-
     δt = t₁ - t₀
 
-    return (samples, δt)
+    metadata = Dict{String, Any}(
+        "time" => Dict{String, Any}(
+            "total" => δt
+        )
+    )
+
+    BQPIO.SampleSet{Int, T}(
+        samples,
+        sampler,
+        metadata,
+    )
 end 

@@ -113,7 +113,7 @@ macro anew(expr)
 
         push!(defaults, quote
             Dict{Symbol,Any}(
-                :raw  => $(esc(attr[:raw])),
+                :raw => $(esc(attr[:raw])),
                 :attr => $(esc(attr[:attr])),
                 :init => $(esc(attr[:init])),
                 :type => $(esc(attr[:type])),
@@ -123,7 +123,7 @@ macro anew(expr)
 
     push!(blocks, quote
         mutable struct Optimizer{T} <: AbstractSampler{T}
-            x::Dict{MOI.VariableIndex,Maybe{Int}}
+            x::Dict{MOI.VariableIndex,Union{Int,Nothing}}
             y::Dict{Int,MOI.VariableIndex}
             Q::Dict{Tuple{Int,Int},T}
             c::T

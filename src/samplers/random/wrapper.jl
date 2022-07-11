@@ -1,8 +1,5 @@
-# -*- :: -*- Attributes -*- :: -*-
-
-# -*- SolverName (get) -*-
 function MOI.get(::Optimizer, ::MOI.SolverName)
-    return "Identity Sampler"
+    return "Random Sampler"
 end
 
 # -*- SolverVersion (get) -*-
