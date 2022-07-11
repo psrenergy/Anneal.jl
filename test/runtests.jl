@@ -19,5 +19,5 @@ include("samplers/exact.jl")
 include("samplers/identity.jl")
 include("samplers/random.jl")
 
-# -*- Bundled Samplers -*-
+# -*- Interfaced Samplers -*-
 include("samplers/simulated.jl")

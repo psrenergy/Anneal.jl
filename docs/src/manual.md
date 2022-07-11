@@ -2,7 +2,7 @@
 
 ## Introduction
 The core idea behind this package is to provide a toolbox for developing and integrating QUBO annealing/sampling tools with the [JuMP](https://jump.dev) mathematical programming environment.
-Appart from the few couple bundled engines, Anneal.jl is inherently about extensions, which is achieved by implementing most of the [MOI](https://jump.dev/MathOptInterface.jl) requirements, leaving only the essential for the developer.
+Appart from the few couple exported utility engines, Anneal.jl is inherently about extensions, which is achieved by implementing most of the [MOI](https://jump.dev/MathOptInterface.jl) requirements, leaving only the essential for the developer.
 
 The annealers and samplers defined via the `AbstractSampler{T}` interface only support models given in a QUBO form, as explained below.
 
