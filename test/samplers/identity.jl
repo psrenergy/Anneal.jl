@@ -1,4 +1,6 @@
 @testset "Identity Sampling" begin
+    Anneal.@test IdentitySampler.Optimizer
+    
     @testset "MOI Attributes" begin
         sampler = IdentitySampler.Optimizer{Float64}()
 

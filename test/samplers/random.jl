@@ -1,4 +1,6 @@
 @testset "Random Sampling" begin
+    Anneal.@test RandomSampler.Optimizer
+
     @testset "MOI Attributes" begin
         sampler = RandomSampler.Optimizer{Float64}()
 

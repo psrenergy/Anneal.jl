@@ -1,4 +1,6 @@
 @testset "Simulated Annealing" begin
+    Anneal.@test SimulatedAnnealer.Optimizer
+
     @testset "MOI Attributes" begin
         annealer = SimulatedAnnealer.Optimizer{Float64}()
 
