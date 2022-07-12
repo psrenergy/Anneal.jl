@@ -1,7 +1,7 @@
 name = "Anneal"
 uuid = "e4d9eb7f-b088-426e-aeb5-1c0dae3d8abb"
 authors = ["pedromxavier <pedroxavier@psr-inc.com>", "joaquimg <joaquim@psr-inc.com>", "AndradeTiago <tiago.andrade@psr-inc.com>", "David Bernal <dbernalneira@usra.edu>"]
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 BQPIO = "13350102-d519-4c12-b840-d575afc922a8"
