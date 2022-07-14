@@ -1,6 +1,4 @@
-function MOI.empty!(sampler::AbstractSampler)
-    MOI.empty!(sampler, BQPIO.backend(sampler))
-end
+
 
 function MOI.empty!(::AbstractSampler, backend::BQPIO.AbstractBQPModel)
     empty!(backend)

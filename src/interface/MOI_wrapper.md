@@ -12,12 +12,17 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 | `MOI.empty!(::Optimizer)`                     |   ❌    |
 | `MOI.is_empty(::Optimizer)::Bool`             |   ❌    |
 | `MOI.optimize!(::Optimizer, ::MOI.ModelLike)` |   ❌    |
-| `Base.show(::IO, ::Optimizer)`                |   ❌    |
+| `Base.show(::IO, ::Optimizer)`                |   ✔️    |
+
+## The `copy_to` interface 
+| Method                                      | Status |
+| :------------------------------------------ | :----: |
+| `MOI.copy_to(::Optimizer, ::MOI.ModelLike)` |   ❌    |
 
 ## Constraint Support
 | Method                                                              | Status |
 | :------------------------------------------------------------------ | :----: |
-| `MOI.supports_constraint(::Optimizer, ::F, ::S)::Bool where {F, S}` |   ❌    |
+| `MOI.supports_constraint(::Optimizer, ::F, ::S)::Bool where {F, S}` |   ✔️    |
 
 ## Attributes
 | Property                    | Type      | `get` | `set` | `supports` |
@@ -30,11 +35,6 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 | `MOI.TimeLimitSec`          | `Float64` |   ❌   |   ❌   |     ❌      |
 | `MOI.RawOptimizerAttribute` | `Any`     |   ❌   |   ❌   |     ❌      |
 | `MOI.NumberOfThreads`       | `Int`     |   ❌   |   ❌   |     ❌      |
-
-## The `copy_to` interface 
-| Method                                      | Status |
-| :------------------------------------------ | :----: |
-| `MOI.copy_to(::Optimizer, ::MOI.ModelLike)` |   ❌    |
 
 ## Names
 | Property             | Type     | `get` | `set` | `supports` |
