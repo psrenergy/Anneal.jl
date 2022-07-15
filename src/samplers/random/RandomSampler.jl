@@ -45,8 +45,4 @@ struct Optimizer{T} <: Anneal.AbstractSampler{T}
     end
 end
 
-BQPIO.backend(sampler::Optimizer) = sampler.backend
-
-
-
 end # module

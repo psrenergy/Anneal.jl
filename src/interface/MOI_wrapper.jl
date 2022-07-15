@@ -1,9 +1,13 @@
+MOI.supports_constraint(
+    ::AbstractSampler,
+    ::MOI.AbstractFunction,
+    ::MOI.AbstractSet,
+) = false
 
+MOI.supports_constraint(
+    ::AbstractSampler,
+    ::VI,
+    ::MOI.ZeroOne,
+) = true
 
-function MOI.empty!(::AbstractSampler, backend::BQPIO.AbstractBQPModel)
-    empty!(backend)
-end
-
-function MOI.empty!(::X, ::Nothing) where X <: AbstractSampler
-    error("'MOI.empty!(::$X)' is not implemented")
-end
+MOI.get(sampler::AbstractSampler, ::MOI.RawSolver) = sampler

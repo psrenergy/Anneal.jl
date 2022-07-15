@@ -1,6 +1,5 @@
 module Anneal
 
-using BQPIO
 using MathOptInterface
 const MOI = MathOptInterface
 const MOIU = MOI.Utilities
@@ -13,9 +12,10 @@ const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 
 import Test
+import BQPIO
 
 # -*- Exports: Interface -*-
-export AbstractSampler, @anew
+export AbstractSampler, Sampler, @anew
 
 # -*- Exports: Submodules -*-
 export ExactSampler, RandomSampler, IdentitySampler
@@ -25,11 +25,12 @@ include("lib/error.jl")
 include("lib/tools.jl")
 include("interface/interface.jl")
 include("interface/MOI_wrapper.jl")
+include("interface/BQPIO_wrapper.jl")
 # include("interface/macros.jl")
 # include("interface/tests.jl")
 
 # -*- Includes: Submodules -*-
-include("samplers/random/RandomSampler.jl")
+# include("samplers/random/RandomSampler.jl")
 # include("samplers/exact/exact.jl")
 # include("samplers/identity/identity.jl")
 
