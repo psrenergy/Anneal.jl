@@ -1,4 +1,4 @@
-# Abstract Annealer
+# A new Sampler
 
 ## MathOptInterface API Coverage
 This Document is intended to help keeping track of which MOI API Methods and Properties have been implemented for a new solver or model interface.
@@ -9,32 +9,32 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 ## Optimizer Interface
 | Method                                        | Status |
 | :-------------------------------------------- | :----: |
-| `MOI.empty!(::Optimizer)`                     |   ❌    |
-| `MOI.is_empty(::Optimizer)::Bool`             |   ❌    |
-| `MOI.optimize!(::Optimizer, ::MOI.ModelLike)` |   ❌    |
-| `Base.show(::IO, ::Optimizer)`                |   ❌    |
+| `MOI.empty!(::Optimizer)`                     |   ♻️    |
+| `MOI.is_empty(::Optimizer)::Bool`             |   ♻️    |
+| `MOI.optimize!(::Optimizer, ::MOI.ModelLike)` |   ♻️    |
+| `Base.show(::IO, ::Optimizer)`                |   ✔️    |
+
+## The `copy_to` interface 
+| Method                                      | Status |
+| :------------------------------------------ | :----: |
+| `MOI.copy_to(::Optimizer, ::MOI.ModelLike)` |   ♻️    |
 
 ## Constraint Support
 | Method                                                              | Status |
 | :------------------------------------------------------------------ | :----: |
-| `MOI.supports_constraint(::Optimizer, ::F, ::S)::Bool where {F, S}` |   ❌    |
+| `MOI.supports_constraint(::Optimizer, ::F, ::S)::Bool where {F, S}` |   ✔️    |
 
 ## Attributes
 | Property                    | Type      | `get` | `set` | `supports` |
 | :-------------------------- | :-------- | :---: | :---: | :--------: |
-| `MOI.SolverName`            | `String`  |   ❌   |   -   |     -      |
-| `MOI.SolverVersion`         | `String`  |   ❌   |   -   |     -      |
-| `MOI.RawSolver`             | `String`  |   ❌   |   -   |     -      |
+| `MOI.SolverName`            | `String`  |   ⚠️   |   -   |     -      |
+| `MOI.SolverVersion`         | `String`  |   ⚠️   |   -   |     -      |
+| `MOI.RawSolver`             | `String`  |   ✔️   |   -   |     -      |
 | `MOI.Name`                  | `String`  |   ❌   |   ❌   |     ❌      |
 | `MOI.Silent`                | `Bool`    |   ❌   |   ❌   |     ❌      |
 | `MOI.TimeLimitSec`          | `Float64` |   ❌   |   ❌   |     ❌      |
 | `MOI.RawOptimizerAttribute` | `Any`     |   ❌   |   ❌   |     ❌      |
 | `MOI.NumberOfThreads`       | `Int`     |   ❌   |   ❌   |     ❌      |
-
-## The `copy_to` interface 
-| Method                                      | Status |
-| :------------------------------------------ | :----: |
-| `MOI.copy_to(::Optimizer, ::MOI.ModelLike)` |   ❌    |
 
 ## Names
 | Property             | Type     | `get` | `set` | `supports` |
@@ -69,14 +69,10 @@ This Document is intended to help keeping track of which MOI API Methods and Pro
 | :------------------------ | :--- | :---: | :---: | :--------: |
 | `MOI.VariablePrimalStart` | `T`  |   ❌   |   ❌   |     ❌      |
 
-## Solver-specific attributes
-| Property        | Type  | `get` | `set` | `supports` |
-| :-------------- | :---- | :---: | :---: | :--------: |
-| `NumberOfReads` | `Int` |   ❌   |   ❌   |     -      |
-
 ## Key
-| Symbol | Meaning                 |
-| :----: | :---------------------- |
-|   ✔️    | Already implemented     |
-|   ❌    | Not implemented         |
-|   ⚠️    | Needs to be implemented |
+| Symbol | Meaning                  |
+| :----: | :----------------------- |
+|   ✔️    | Available                |
+|   ♻️    | Available via `BQPIO.jl` |
+|   ❌    | Not implemented          |
+|   ⚠️    | Needs to be implemented  |

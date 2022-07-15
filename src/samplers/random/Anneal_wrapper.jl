@@ -14,11 +14,10 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     t₀ = time()
     samples = Vector{Int}[random_sample(rng, n, random_bias) for _ = 1:m]
     t₁ = time()
-    δt = t₁ - t₀
 
     metadata = Dict{String,Any}(
         "time" => Dict{String,Any}(
-            "total" => δt,
+            "sampling" => (t₁ - t₀),
         ),
     )
 
