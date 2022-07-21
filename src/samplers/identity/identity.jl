@@ -1,11 +1,17 @@
 module IdentitySampler
 
-using Anneal
-using MathOptInterface
+import BQPIO
+import Anneal
+import MathOptInterface
 const MOI = MathOptInterface
 const VI = MOI.VariableIndex
 
-include("sampler.jl")
-include("MOI_wrapper.jl")
+Anneal.@anew Optimizer begin
+    domain = :bool
+    name = "Identity Sampler"
+    version = v"1.0.0"
+end
+
+Anneal.@check(Optimizer)
 
 end # module

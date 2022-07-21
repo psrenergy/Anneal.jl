@@ -30,7 +30,7 @@ include("interface/BQPIO_wrapper.jl")
 # include("interface/tests.jl")
 
 # -*- Includes: Submodules -*-
-# include("samplers/random/RandomSampler.jl")
+include("samplers/RandomSampler.jl")
 # include("samplers/exact/exact.jl")
 # include("samplers/identity/identity.jl")
 
