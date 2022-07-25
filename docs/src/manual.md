@@ -65,7 +65,7 @@ module SuperAnnealer
 
     function Anneal.sample(sampler::Optimizer)
         # Is your annealer running on the Ising Model? Have this:
-        s, h, J, c = Anneal.ising_normal_form(sampler.x, sampler.Q, sampler.c)
+        s, h, J, c = Anneal.ising(sampler)
 
         n = MOI.get(sampler, NumberOfReads())
         attr = MOI.get(sampler, SuperAttribute())

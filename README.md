@@ -69,11 +69,31 @@ for i = 1:result_count(model)
 end
 ```
 
-## Exported Samplers
-
-### Utility Samplers
+### Samplers
 | Module Name       | Descripition                                                                                                                                               | Package                                             | Status |
 | :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :----: |
 | `ExactSampler`    | Sequentially samples all possible states by exaustive enumeration. Finds the global optimum but can't be used for models with much more than 20 variables. | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
+| `IdentitySampler` | Samples the exact same state defined as warm start.                                                                                                        | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
 | `RandomSampler`   | Randomly samples states by regular or biased coin tossing. It is commonly used to compare new solving methods to a _random guessing_ baseline.             | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
-| `IdentitySampler` | Samples the exact same state defined as warm start.                                                                                                | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
+
+### Interface (aka. integrating your own sampler)
+
+```mermaid
+flowchart TD;
+    OPTIMIZER["<code>MOI.AbstractOptimizer</code>"];
+    ABSTRACT["<code>AbstractSampler{T}</code>"];
+    SAMPLER["<code>Sampler{T}</code>"];
+    AUTOMATIC["<code>AutomaticSampler{T}</code>"];
+
+    EXACT(["<code>ExactSampler{T}</code>"]);
+    IDENTITY(["<code>IdentiySampler{T}</code>"]);
+    RANDOM(["<code>RandomSampler{T}</code>"]);
+
+    OPTIMIZER --> ABSTRACT;
+    ABSTRACT --> SAMPLER;
+    SAMPLER --> AUTOMATIC;
+
+    AUTOMATIC ---> EXACT;
+    AUTOMATIC ---> IDENTITY;
+    AUTOMATIC ---> RANDOM;
+```

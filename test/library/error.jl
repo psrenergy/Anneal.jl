@@ -1,4 +1,5 @@
-@testset "Error Messages" begin
+function test_error_library()
+    @testset "Error Messages" begin
     io = IOBuffer()
 
     error_msg = "Error Message!"
@@ -10,4 +11,5 @@
     showerror(io, Anneal.QUBOError())
 
     @test occursin("ToQUBO.jl", String(take!(io)))
+    end
 end

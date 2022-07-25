@@ -12,26 +12,34 @@ const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 
 import Test
-import BQPIO
+import BQPIO: BQPIO, SampleSet, Sample
 
 # -*- Exports: Interface -*-
 export AbstractSampler, Sampler, @anew
 
 # -*- Exports: Submodules -*-
-export ExactSampler, RandomSampler, IdentitySampler
+export IdentitySampler, ExactSampler, RandomSampler
 
 # -*- Includes: Anneal -*-
 include("lib/error.jl")
 include("lib/tools.jl")
-include("interface/interface.jl")
-include("interface/MOI_wrapper.jl")
-include("interface/BQPIO_wrapper.jl")
-# include("interface/macros.jl")
-# include("interface/tests.jl")
+include("interface/abstract/interface.jl")
+include("interface/abstract/MOI_wrapper.jl")
+include("interface/backend/interface.jl")
+include("interface/backend/BQPIO_wrapper.jl")
+include("interface/backend/MOI_wrapper.jl")
+include("interface/automatic/interface.jl")
+include("interface/automatic/attributes.jl")
+include("interface/automatic/macros.jl")
+include("interface/automatic/BQPIO_wrapper.jl")
+include("interface/automatic/MOI_wrapper.jl")
+
+# -*- Includes: Tests -*-
+include("test/test.jl")
 
 # -*- Includes: Submodules -*-
+include("samplers/IdentitySampler.jl")
+include("samplers/ExactSampler.jl")
 include("samplers/RandomSampler.jl")
-# include("samplers/exact/exact.jl")
-# include("samplers/identity/identity.jl")
 
 end # module

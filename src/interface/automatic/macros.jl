@@ -1,29 +1,29 @@
+const ANEW_REGISTRY = Set{Module}()
+
+struct ANEW_SAMPLER_ATTR{T}
+    default::T
+    optattr::Union{Symbol,Nothing}
+    rawattr::Union{String,Nothing}
+
+    function ANEW_SAMPLER_ATTR{T}(
+        default::T;
+        optattr::Union{Symbol,Nothing}=nothing,
+        rawattr::Union{String,Nothing}=nothing
+    ) where {T}
+        new{T}(default, optattr, rawattr)
+    end
+
+    function ANEW_SAMPLER_ATTR(args...; kws...)
+        ANEW_SAMPLER_ATTR{Any}(args...; kws...)
+    end
+end
+
 ANEW_DEFAULT_PARAMS() = Dict{Symbol,Any}(
     :name => "Binary Quadratic Sampler",
     :version => v"1.0.0",
     :domain => :bool,
-    :attributes => Dict{Symbol,Any},
+    :attributes => Anneal.ANEW_SAMPLER_ATTR[],
 )
-
-struct ANEW_ATTR{T}
-    raw::Union{String,Nothing}
-    attr::Union{Symbol,Nothing}
-    init::T
-
-    function ANEW_ATTR{T}(;
-        raw::Union{String,Nothing}=nothing,
-        attr::Union{Symbol,Nothing}=nothing,
-        init::T
-    ) where {T}
-        @assert isnothing(raw) ⊼ isnothing(attr)
-
-        new{T}(raw, attr, init)
-    end
-
-    function ANEW_ATTR(; kws...)
-        ANEW_ATTR{Any}(; kws...)
-    end
-end
 
 function anew_error(msg::String)
     error("Invalid usage of @anew: $msg")
@@ -79,7 +79,10 @@ end
 
 function anew_parse_param(::Val{:attributes}, value)
     if value isa Expr && value.head === :block
-        ANEW_ATTR[attr for attr in anew_parse_attr.(value.args) if !isnothing(attr)]
+        Anneal.ANEW_SAMPLER_ATTR[
+            attr for attr in anew_parse_attr.(value.args)
+            if !isnothing(attr)
+        ]
     else
         anew_error("parameter 'attributes' must be a `begin...end` block")
     end
@@ -92,74 +95,80 @@ function anew_parse_attr(stmt)
         anew_error("each attribute definition must be an assignment to its default value")
     end
 
-    item, init = stmt.args
+    attr, value = stmt.args
 
-    if item isa Symbol # ~ MOI attribute only
-        if !(Base.isidentifier(item))
-            anew_error("attribute identifier '$item' is not a valid one")
+    default = eval(value)
+
+    if attr isa Symbol # ~ MOI attribute only
+        if !(Base.isidentifier(attr))
+            anew_error("attribute identifier '$attr' is not a valid one")
         end
 
-        ANEW_ATTR(;
-            attr=item,
-            init=init
+        Anneal.ANEW_SAMPLER_ATTR(
+            default;
+            optattr=attr
         )
-    elseif item isa String # ~ Raw attribute only
-        ANEW_ATTR(;
-            raw=item,
-            init=init
+    elseif attr isa String # ~ Raw attribute only
+        Anneal.ANEW_SAMPLER_ATTR(
+            default;
+            rawattr=attr
         )
-    elseif item isa Expr && item.head === :(::)
-        code, type = item.args
+    elseif attr isa Expr && attr.head === :(::)
+        attr, type = attr.args
 
         T = eval(type)
 
-        if code isa Symbol
-            if !(Base.isidentifier(code))
-                anew_error("attribute identifier '$code' is not a valid one")
+        if attr isa Symbol
+            if !(Base.isidentifier(attr))
+                anew_error("attribute identifier '$attr' is not a valid one")
             end
 
-            ANEW_ATTR{T}(;
-                attr=code,
-                init=init
+            Anneal.ANEW_SAMPLER_ATTR{T}(
+                default;
+                optattr=attr
             )
-        elseif code isa String
-            ANEW_ATTR{T}(;
-                raw=code,
-                init=init
+        elseif attr isa String
+            Anneal.ANEW_SAMPLER_ATTR{T}(
+                default;
+                rawattr=attr
             )
-        elseif code isa Expr && (code.head === :ref || item.head === :call)
-            name, raw = code.args
+        elseif attr isa Expr && (attr.head === :ref || item.head === :call)
+            optattr, rawattr = attr.args
 
-            if name isa Symbol && raw isa String
-                if !(Base.isidentifier(name))
-                    anew_error("attribute identifier '$name' is not a valid one")
+            if optattr isa Symbol && rawattr isa String
+                if !(Base.isidentifier(optattr))
+                    anew_error("attribute identifier '$optattr' is not a valid one")
                 end
 
-                ANEW_ATTR{T}(;
-                    raw=raw,
-                    attr=name,
-                    init=init
+                Anneal.ANEW_SAMPLER_ATTR{T}(
+                    default;
+                    rawattr=rawattr,
+                    optattr=optattr
                 )
             else
                 anew_error("invalid attribute identifier '$name($raw)'")
             end
         else
-            anew_error("invalid attribute identifier '$code'")
+            anew_error("invalid attribute identifier '$attr'")
         end
-    elseif item isa Expr && (item.head === :ref || item.head === :call)
-        name, raw = item.args
+    elseif attr isa Expr && (attr.head === :ref || attr.head === :call)
+        optattr, rawattr = attr.args
 
-        if name isa Symbol && raw isa String
-            ANEW_ATTR(;
-                raw=raw,
-                attr=name,
-                init=init
+        if optattr isa Symbol && rawattr isa String
+            if !(Base.isidentifier(optattr))
+                anew_error("attribute identifier '$optattr' is not a valid one")
+            end
+
+            Anneal.ANEW_SAMPLER_ATTR(
+                default;
+                rawattr=rawattr,
+                optattr=optattr
             )
         else
-            anew_error("invalid attribute identifier '$name($raw)'")
+            anew_error("invalid attribute identifier '$name[$rawattr]'")
         end
     else
-        anew_error("invalid attribute signature '$item'")
+        anew_error("invalid attribute signature '$attr'")
     end
 end
 
@@ -184,17 +193,11 @@ function anew_parse_params(block::Expr)
         end
     end
 
-    @show params
-
-    return params
+    params
 end
 
 function anew_parse_params()
-    params = ANEW_DEFAULT_PARAMS()
-
-    @show params
-
-    return params
+    ANEW_DEFAULT_PARAMS()
 end
 
 function anew_parse(args...)
@@ -237,39 +240,44 @@ function anew_parse(id, block)
     return (id, params)
 end
 
-function anew_attr(id::Symbol, attr::ANEW_ATTR{T}) where {T}
-    if !isnothing(attr.attr) && !isnothing(attr.raw)
-        quote
-            struct $(attr.attr) <: Anneal.SamplerAttribute end
+function anew_attr(attr::Anneal.ANEW_SAMPLER_ATTR{T}) where {T}
+    if !isnothing(attr.optattr) && !isnothing(attr.rawattr)
+        return quote
+            struct $(esc(attr.optattr)) <: Anneal.AbstractSamplerAttribute end
 
-            function MOI.get(sampler::$(id), ::$(attr.attr))
-                MOI.get(sampler, MOI.RawOptimizerAttribute($(attr.raw)))
-            end
-
-            function MOI.set(sampler::$(id), ::$(attr.attr), value::$(T))
-                MOI.set(sampler, MOI.RawOptimizerAttribute($(attr.raw)), value)
-
-                nothing
-            end
+            push!(
+                __SAMPLER_ATTRIBUTES,
+                Anneal.SamplerAttribute{$(T)}(
+                    $(attr.default);
+                    rawattr=$(esc(attr.rawattr)),
+                    optattr=$(esc(attr.optattr))()
+                )
+            )
         end
-    elseif !isnothing(attr.attr)
-        quote
-            struct $(attr.attr) <: Anneal.SamplerAttribute end
+    elseif !isnothing(attr.optattr)
+        return quote
+            struct $(esc(attr.optattr)) <: Anneal.AbstractSamplerAttribute end
 
-            function MOI.get(sampler::$(id), attr::$(attr.attr))
-                get(sampler.opt_attr, attr, $(esc(attr.init)))::$(T)
-            end
-
-            function MOI.set(sampler::$(id), attr::$(attr.attr), value::$(T))
-                setitem!(sample.opt_attr, value, attr)
-
-                nothing
-            end
+            push!(
+                __SAMPLER_ATTRIBUTES,
+                Anneal.SamplerAttribute{$(T)}(
+                    $(attr.default);
+                    optattr=$(esc(attr.optattr))()
+                )
+            )
         end
-    elseif !isnothing(attr.raw)
-        quote end
+    elseif !isnothing(attr.rawattr)
+        return quote
+            push!(
+                __SAMPLER_ATTRIBUTES,
+                Anneal.SamplerAttribute{$(T)}(
+                    $(attr.default);
+                    rawattr=$(esc(attr.rawattr))
+                )
+            )
+        end
     else
-        error("both 'attr' and 'raw' are 'nothing' for 'ANEW_ATTR'")
+        error("Looks like some assertions were skipped. Did you turn some optimizations on?")
     end
 end
 
@@ -303,7 +311,11 @@ end
 """
 macro anew(raw_args...)
     if __module__ === Main
-        anew_error("macro must be called from within a module (not Main)")
+        # anew_error("macro must be called from within a module (not Main)")
+    elseif __module__ ∈ Anneal.ANEW_REGISTRY
+        anew_error("macro should be called only once within a module")
+    else
+        push!(Anneal.ANEW_REGISTRY, __module__)
     end
 
     args = map(
@@ -325,36 +337,30 @@ macro anew(raw_args...)
         error("domain ≂̸ :spin, :bool")
     end
 
-    attributes = [anew_attr(id, attr) for attr in params[:attributes]]
+    attr_blocks = anew_attr.(params[:attributes])
 
+    # ~ For this mechanism to work it is very important that the
+    #   @anew macro is called at most once inside each module.
     quote
-        $(attributes...)
+        const __SAMPLER_ATTRIBUTES = Anneal.SamplerAttribute[]
 
-        const __BACKEND{T} = BQPIO.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}
-        const __RAW_ATTRS = Dict{String, Any}()
-
-        struct $(esc(id)){T} <: Anneal.Sampler{T}
+        struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
             # ~*~ BQPIO Backend ~*~ #
-            backend::__BACKEND{T}
-            # ~*~ MathOptInterface ~*~ #
-            moi_attrs::MOIAttributes{T}
-            # ~*~ Optimizer Attributes ~*~ #
-            raw_attrs::Dict{String,Any}
-            opt_attrs::Dict{Any,Any}
+            backend::BQPIO.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}
+            # ~*~ Attributes ~*~ #
+            attrs::Anneal.SamplerAttributeData{T}
 
-            function $(esc(id)){T}() where {T}
-                backend = __BACKEND{T}()
-
+            function $(esc(id)){T}(args...; kws...) where {T}
                 new{T}(
-                    __BACKEND{T}(),
-                    MOIAttributes{T}(),
-                    deepcopy(__RAW_ATTRS),
-                    Dict{Any,Any}(),
+                    BQPIO.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}(),
+                    Anneal.SamplerAttributeData{T}(
+                        copy.(__SAMPLER_ATTRIBUTES)
+                    ),
                 )
             end
 
-            function $(esc(id))()
-                $(esc(id)){Float64}()
+            function $(esc(id))(args...; kws...)
+                $(esc(id)){Float64}(args...; kws...)
             end
         end
 
@@ -362,5 +368,7 @@ macro anew(raw_args...)
 
         MOI.get(::$(esc(id)), ::MOI.SolverName) = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))
+
+        $(attr_blocks...)
     end
 end
