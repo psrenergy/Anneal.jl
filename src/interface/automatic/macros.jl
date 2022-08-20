@@ -346,13 +346,13 @@ macro anew(raw_args...)
 
         struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
             # ~*~ QUBOTools Backend ~*~ #
-            backend::QUBOTools.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}
+            backend::QUBOTools.StandardQUBOModel{MOI.VariableIndex,Int,T,$(domain)}
             # ~*~ Attributes ~*~ #
             attrs::Anneal.SamplerAttributeData{T}
 
             function $(esc(id)){T}(args...; kws...) where {T}
                 new{T}(
-                    QUBOTools.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}(),
+                    QUBOTools.StandardQUBOModel{MOI.VariableIndex,Int,T,$(domain)}(),
                     Anneal.SamplerAttributeData{T}(
                         copy.(__SAMPLER_ATTRIBUTES)
                     ),

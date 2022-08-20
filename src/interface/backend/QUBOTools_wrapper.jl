@@ -1,4 +1,4 @@
-function QUBOTools.StandardBQPModel{T}(model::MOI.ModelLike) where {T}
+function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
     if !isqubolike(model)
         # Throws default massage (ToQUBO.jl advertisement 😎)
         throw(QUBOError(nothing))
@@ -67,7 +67,7 @@ function QUBOTools.StandardBQPModel{T}(model::MOI.ModelLike) where {T}
         c = -c
     end
 
-    QUBOTools.StandardBQPModel{VI,Int,T,QUBOTools.BoolDomain}(
+    QUBOTools.StandardQUBOModel{VI,Int,T,QUBOTools.BoolDomain}(
         L,
         Q,
         x;
@@ -117,7 +117,7 @@ end
 function MOI.copy_to(sampler::Sampler{T}, model::MOI.ModelLike) where {T}
     copy!(
         QUBOTools.backend(sampler),
-        QUBOTools.StandardBQPModel{T}(model),
+        QUBOTools.StandardQUBOModel{T}(model),
     )
 
     return MOIU.identity_index_map(model)

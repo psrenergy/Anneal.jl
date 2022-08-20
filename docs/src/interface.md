@@ -89,7 +89,7 @@ If you want to dive deeper into
 import Anneal
 import QUBOTools
 
-const QUBOTools_BACKEND{T} = QUBOTools.StandardBQPModel{VI, Int, T, QUBOTools.BoolDomain}
+const QUBOTools_BACKEND{T} = QUBOTools.StandardQUBOModel{VI, Int, T, QUBOTools.BoolDomain}
 
 mutable struct Optimizer{T} <: Anneal.Sampler{T}
     backend::QUBOTools_BACKEND{T}
