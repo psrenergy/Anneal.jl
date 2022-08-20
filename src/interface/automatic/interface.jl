@@ -1,4 +1,4 @@
-abstract type AutomaticSampler{T} <: Sampler{T} end
+abstract type AutomaticSampler{T} <: AbstractSampler{T} end
 
 @doc raw"""
 """ function __parse_results end

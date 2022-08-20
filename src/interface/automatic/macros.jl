@@ -311,7 +311,7 @@ end
 """
 macro anew(raw_args...)
     if __module__ === Main
-        # anew_error("macro must be called from within a module (not Main)")
+        anew_error("macro must be called from within a module (not Main)")
     elseif __module__ ∈ Anneal.ANEW_REGISTRY
         anew_error("macro should be called only once within a module")
     else

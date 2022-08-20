@@ -189,10 +189,10 @@ function Base.setindex!(attrs::SamplerAttributeData, raw_attr::String, value)
     end
 end
 
-function MOI.get(sampler::Sampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute}, value)
+function MOI.get(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute}, value)
     sampler.attrs[attr] = value
 end
 
-function MOI.set(sampler::Sampler, attr::MOI.RawOptimizerAttribute, value)
+function MOI.set(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute, value)
     sampler.attrs[attr.name] = value
 end
