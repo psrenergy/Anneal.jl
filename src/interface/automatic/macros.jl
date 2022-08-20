@@ -330,9 +330,9 @@ macro anew(raw_args...)
     version = params[:version]
 
     domain = if params[:domain] === :bool
-        :(BQPIO.BoolDomain)
+        :(QUBOTools.BoolDomain)
     elseif params[:domain] === :spin
-        :(BQPIO.SpinDomain)
+        :(QUBOTools.SpinDomain)
     else
         error("domain ≂̸ :spin, :bool")
     end
@@ -345,14 +345,14 @@ macro anew(raw_args...)
         const __SAMPLER_ATTRIBUTES = Anneal.SamplerAttribute[]
 
         struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
-            # ~*~ BQPIO Backend ~*~ #
-            backend::BQPIO.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}
+            # ~*~ QUBOTools Backend ~*~ #
+            backend::QUBOTools.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}
             # ~*~ Attributes ~*~ #
             attrs::Anneal.SamplerAttributeData{T}
 
             function $(esc(id)){T}(args...; kws...) where {T}
                 new{T}(
-                    BQPIO.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}(),
+                    QUBOTools.StandardBQPModel{MOI.VariableIndex,Int,T,$(domain)}(),
                     Anneal.SamplerAttributeData{T}(
                         copy.(__SAMPLER_ATTRIBUTES)
                     ),
@@ -364,7 +364,7 @@ macro anew(raw_args...)
             end
         end
 
-        BQPIO.backend(sampler::$(esc(id))) = sampler.backend
+        QUBOTools.backend(sampler::$(esc(id))) = sampler.backend
 
         MOI.get(::$(esc(id)), ::MOI.SolverName) = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))

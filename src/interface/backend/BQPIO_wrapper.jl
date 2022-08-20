@@ -1,4 +1,4 @@
-function BQPIO.StandardBQPModel{T}(model::MOI.ModelLike) where {T}
+function QUBOTools.StandardBQPModel{T}(model::MOI.ModelLike) where {T}
     if !isqubolike(model)
         # Throws default massage (ToQUBO.jl advertisement 😎)
         throw(QUBOError(nothing))
@@ -67,7 +67,7 @@ function BQPIO.StandardBQPModel{T}(model::MOI.ModelLike) where {T}
         c = -c
     end
 
-    BQPIO.StandardBQPModel{VI,Int,T,BQPIO.BoolDomain}(
+    QUBOTools.StandardBQPModel{VI,Int,T,QUBOTools.BoolDomain}(
         L,
         Q,
         x;
@@ -75,17 +75,17 @@ function BQPIO.StandardBQPModel{T}(model::MOI.ModelLike) where {T}
     )
 end
 
-function BQPIO.backend(::X) where {X<:Sampler}
-    error("'BQPIO.backend' not implemented for '$X'")
+function QUBOTools.backend(::X) where {X<:Sampler}
+    error("'QUBOTools.backend' not implemented for '$X'")
 end
 
 # ~*~ :: MathOptInterface :: ~*~ #
 function MOI.empty!(sampler::Sampler)
-    empty!(BQPIO.backend(sampler))
+    empty!(QUBOTools.backend(sampler))
 end
 
 function MOI.is_empty(sampler::Sampler)
-    isempty(BQPIO.backend(sampler))
+    isempty(QUBOTools.backend(sampler))
 end
 
 function MOI.optimize!(sampler::Sampler)
@@ -111,20 +111,20 @@ function Base.show(io::IO, sampler::Sampler)
         with backend:
         """
     )
-    print(io, BQPIO.backend(sampler))
+    print(io, QUBOTools.backend(sampler))
 end
 
 function MOI.copy_to(sampler::Sampler{T}, model::MOI.ModelLike) where {T}
     copy!(
-        BQPIO.backend(sampler),
-        BQPIO.StandardBQPModel{T}(model),
+        QUBOTools.backend(sampler),
+        QUBOTools.StandardBQPModel{T}(model),
     )
 
     return MOIU.identity_index_map(model)
 end
 
 function MOI.get(sampler::Sampler, ps::MOI.PrimalStatus, ::VI)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     ri = ps.result_index
 
@@ -139,7 +139,7 @@ function MOI.get(sampler::Sampler, ps::MOI.PrimalStatus, ::VI)
 end
 
 function MOI.get(sampler::Sampler, ds::MOI.DualStatus, ::VI)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     ri = ds.result_index
 
@@ -154,7 +154,7 @@ function MOI.get(sampler::Sampler, ds::MOI.DualStatus, ::VI)
 end
 
 function MOI.get(sampler::Sampler, ::MOI.RawStatusString)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     if isnothing(sampleset) || !haskey(samplset.metadata, "status")
         ""
@@ -164,11 +164,11 @@ function MOI.get(sampler::Sampler, ::MOI.RawStatusString)
 end
 
 function MOI.get(sampler::Sampler, ::MOI.ResultCount)
-    length(BQPIO.sampleset(sampler))
+    length(QUBOTools.sampleset(sampler))
 end
 
 function MOI.get(sampler::Sampler, ::MOI.TerminationStatus)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     if isnothing(sampleset) || isempty(sampleset)
         MOI.OPTIMIZE_NOT_CALLED
@@ -181,7 +181,7 @@ function MOI.get(sampler::Sampler, ::MOI.TerminationStatus)
 end
 
 function MOI.get(sampler::Sampler, ov::MOI.ObjectiveValue)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     ri = ov.result_index
 
@@ -195,7 +195,7 @@ function MOI.get(sampler::Sampler, ov::MOI.ObjectiveValue)
 end
 
 function MOI.get(sampler::Sampler, ::MOI.SolveTimeSec)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     if isnothing(sampleset) || !haskey(sampleset.metadata, "time")
         0.0
@@ -213,7 +213,7 @@ function MOI.get(sampler::Sampler, ::MOI.SolveTimeSec)
 end
 
 function MOI.get(sampler::Sampler, vp::MOI.VariablePrimal, vi::VI)
-    sampleset = BQPIO.sampleset(sampler)
+    sampleset = QUBOTools.sampleset(sampler)
 
     ri = vp.result_index
 
@@ -223,7 +223,7 @@ function MOI.get(sampler::Sampler, vp::MOI.VariablePrimal, vi::VI)
         error("Invalid result index '$ri'; There are $(length(sampleset)) solutions")
     end
 
-    variable_map = BQPIO.variable_map(sampler)
+    variable_map = QUBOTools.variable_map(sampler)
 
     if !haskey(variable_map, vi)
         error("Variable index '$vi' not in model")
@@ -233,7 +233,7 @@ function MOI.get(sampler::Sampler, vp::MOI.VariablePrimal, vi::VI)
 end
 
 function MOI.get(sampler::Sampler, ::MOI.NumberOfVariables)
-    BQPIO.domain_size(sampler)
+    QUBOTools.domain_size(sampler)
 end
 
 # ~*~ :: I/O :: ~*~ #
@@ -241,8 +241,8 @@ function Base.write(filename::String, sampler::Sampler)
     write(
         filename,
         convert(
-            BQPIO.infer_model_type(filename),
-            BQPIO.backend(sampler),
+            QUBOTools.infer_model_type(filename),
+            QUBOTools.backend(sampler),
         )
     )
 
@@ -251,10 +251,10 @@ end
 
 function Base.read!(filename::String, sampler::Sampler)
     copy!(
-        BQPIO.backend(sampler),
+        QUBOTools.backend(sampler),
         read(
             filename,
-            BQPIO.infer_model_type(filename)
+            QUBOTools.infer_model_type(filename)
         )
     )
 

@@ -81,21 +81,21 @@ Types are guaranteed to be consistent. In the other hand, values must undergo as
 
 We expect that most users will be happy with this approach and it is likely that it will be improved very often.
 
-### The [`BQPIO`](https://github.com/psrenergy/BQPIO.jl) backend
+### The [`QUBOTools`](https://github.com/psrenergy/QUBOTools.jl) backend
 
 If you want to dive deeper into
 
 ```julia
 import Anneal
-import BQPIO
+import QUBOTools
 
-const BQPIO_BACKEND{T} = BQPIO.StandardBQPModel{VI, Int, T, BQPIO.BoolDomain}
+const QUBOTools_BACKEND{T} = QUBOTools.StandardBQPModel{VI, Int, T, QUBOTools.BoolDomain}
 
 mutable struct Optimizer{T} <: Anneal.Sampler{T}
-    backend::BQPIO_BACKEND{T}
+    backend::QUBOTools_BACKEND{T}
 end
 
-BQPIO.backend(sampler::Optimizer) = sampler.backend
+QUBOTools.backend(sampler::Optimizer) = sampler.backend
 ```
 
 ## MathOptInterface API Coverage

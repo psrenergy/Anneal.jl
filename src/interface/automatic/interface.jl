@@ -26,7 +26,7 @@ function Anneal.sample!(sampler::AutomaticSampler)
         sampleset.metadata["time"]["total"] = results.time
     end
 
-    backend = BQPIO.backend(sampler)
+    backend = QUBOTools.backend(sampler)
     backend.sampleset = sampleset
 
     nothing

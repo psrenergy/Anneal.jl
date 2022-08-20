@@ -10,7 +10,7 @@ end
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Attributes ~*~ #
-    v = BQPIO.variable_inv(sampler)
+    v = QUBOTools.variable_inv(sampler)
     n = MOI.get(sampler, MOI.NumberOfVariables())
 
     # ~*~ Sample Random States ~*~ #

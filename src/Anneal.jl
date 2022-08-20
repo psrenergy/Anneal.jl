@@ -12,7 +12,7 @@ const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 
 import Test
-import BQPIO: BQPIO, SampleSet, Sample
+import QUBOTools: QUBOTools, SampleSet, Sample
 
 # -*- Exports: Interface -*-
 export AbstractSampler, Sampler, @anew
@@ -26,12 +26,12 @@ include("lib/tools.jl")
 include("interface/abstract/interface.jl")
 include("interface/abstract/MOI_wrapper.jl")
 include("interface/backend/interface.jl")
-include("interface/backend/BQPIO_wrapper.jl")
+include("interface/backend/QUBOTools_wrapper.jl")
 include("interface/backend/MOI_wrapper.jl")
 include("interface/automatic/interface.jl")
 include("interface/automatic/attributes.jl")
 include("interface/automatic/macros.jl")
-include("interface/automatic/BQPIO_wrapper.jl")
+include("interface/automatic/QUBOTools_wrapper.jl")
 include("interface/automatic/MOI_wrapper.jl")
 
 # -*- Includes: Tests -*-

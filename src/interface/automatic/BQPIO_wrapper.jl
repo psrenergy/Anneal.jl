@@ -1,1 +1,1 @@
-BQPIO.backend(sampler::AutomaticSampler) = sampler.backend
+QUBOTools.backend(sampler::AutomaticSampler) = sampler.backend

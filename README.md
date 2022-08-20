@@ -28,8 +28,8 @@ Problems assigned to solvers defined within Anneal.jl's interface are given by
 
 $$
 \begin{array}{rl}
-\text{QUBO}:~ \min & \vec{x}' Q \vec{x} \\
-      \text{s.t.} & \vec{x} \in \mathbb{B}^{n}
+\text{QUBO}:~ \displaystyle \min_{\vec{x}} & \displaystyle \alpha \left[{ \vec{x}' Q \vec{x} + \beta }\right] \\
+                               \text{s.t.} & \displaystyle \vec{x} \in S \cong \mathbb{B}^{n}
 \end{array}
 $$
 
@@ -82,7 +82,6 @@ end
 flowchart TD;
     OPTIMIZER["<code>MOI.AbstractOptimizer</code>"];
     ABSTRACT["<code>AbstractSampler{T}</code>"];
-    SAMPLER["<code>Sampler{T}</code>"];
     AUTOMATIC["<code>AutomaticSampler{T}</code>"];
 
     EXACT(["<code>ExactSampler{T}</code>"]);
@@ -90,8 +89,7 @@ flowchart TD;
     RANDOM(["<code>RandomSampler{T}</code>"]);
 
     OPTIMIZER --> ABSTRACT;
-    ABSTRACT --> SAMPLER;
-    SAMPLER --> AUTOMATIC;
+    ABSTRACT  --> AUTOMATIC;
 
     AUTOMATIC ---> EXACT;
     AUTOMATIC ---> IDENTITY;
