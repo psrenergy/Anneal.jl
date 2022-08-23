@@ -4,8 +4,7 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
         throw(QUBOError(nothing))
     end
 
-    x = Dict{VI,Int}(xᵢ => i for (i, xᵢ) in enumerate(MOI.get(model, MOI.ListOfVariableIndices())))
-    L = Dict{Int,T}()
+    L = Dict{VI,T}(xᵢ => zero(T) for xᵢ in MOI.get(model, MOI.ListOfVariableIndices()))
     Q = Dict{Tuple{Int,Int},T}()
     c = zero(T)
 
@@ -13,15 +12,13 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
     f = MOI.get(model, MOI.ObjectiveFunction{F}())
 
     if F <: VI
-        Q[f, f] = one(T)
+        L[f] += one(T)
     elseif F <: SAF
         for a in f.terms
             cᵢ = a.coefficient
             xᵢ = a.variable
 
-            i = x[xᵢ]
-
-            L[i] = get(L, i, zero(T)) + cᵢ
+            L[xᵢ] +=  cᵢ
         end
 
         c += f.constant
@@ -30,32 +27,22 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
             cᵢ = a.coefficient
             xᵢ = a.variable
 
-            i = x[xᵢ]
-
-            L[i] = get(L, i, zero(T)) + cᵢ
+            L[xᵢ] += cᵢ
         end
 
         for a in f.quadratic_terms
             cᵢⱼ = a.coefficient
-            xᵢ = a.variable_1
-            xⱼ = a.variable_2
+            xᵢ  = a.variable_1
+            xⱼ  = a.variable_2
 
-            i = x[xᵢ]
-            j = x[xⱼ]
-
-            if i > j
-                # Not sure if this ever happens.
-                i, j = j, i
-            end
-
-            if i == j
+            if xᵢ == xⱼ
                 # MOI assumes 
                 #   SQF := ½ x Q x + ax + b
                 # Thus, the main diagonal is doubled
                 # from our point of view
-                L[i] = get(L, i, zero(T)) + cᵢⱼ / 2
+                L[xᵢ] += cᵢⱼ / 2
             else
-                Q[i, j] = get(Q, (i, j), zero(T)) + cᵢⱼ
+                Q[xᵢ, xⱼ] = get(Q, (xᵢ, xⱼ), zero(T)) + cᵢⱼ
             end
         end
 
@@ -70,8 +57,7 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
 
     QUBOTools.StandardQUBOModel{VI,Int,T,QUBOTools.BoolDomain}(
         L,
-        Q,
-        x;
+        Q;
         offset=c
     )
 end
