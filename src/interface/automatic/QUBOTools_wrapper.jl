@@ -5,7 +5,7 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
     end
 
     L = Dict{VI,T}(xᵢ => zero(T) for xᵢ in MOI.get(model, MOI.ListOfVariableIndices()))
-    Q = Dict{Tuple{Int,Int},T}()
+    Q = Dict{Tuple{VI,VI},T}()
     c = zero(T)
 
     F = MOI.get(model, MOI.ObjectiveFunctionType())
@@ -50,8 +50,8 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
     end
 
     if MOI.get(model, MOI.ObjectiveSense()) === MOI.MAX_SENSE
-        L = Dict{Int,T}(k => -Lₖ for (k, Lₖ) in L)
-        Q = Dict{Tuple{Int,Int},T}(k => -Qₖ for (k, Qₖ) in Q)
+        L = Dict{VI,T}(k => -Lₖ for (k, Lₖ) in L)
+        Q = Dict{Tuple{VI,VI},T}(k => -Qₖ for (k, Qₖ) in Q)
         c = -c
     end
 
