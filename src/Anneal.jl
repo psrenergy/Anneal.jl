@@ -12,15 +12,18 @@ const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 
 import Test
-import QUBOTools: QUBOTools, SampleSet, Sample
 
-# -*- Exports: Interface -*-
+# ~*~ Imports: Backend ~*~ # 
+import QUBOTools: QUBOTools, SampleSet, Sample
+import QUBOTools: ising, qubo
+
+# -*- Exports: Interface -*- #
 export AbstractSampler, Sampler, @anew
 
-# -*- Exports: Submodules -*-
+# -*- Exports: Submodules -*- #
 export IdentitySampler, ExactSampler, RandomSampler
 
-# -*- Includes: Anneal -*-
+# -*- Includes: Anneal -*- #
 include("lib/error.jl")
 include("lib/tools.jl")
 include("interface/abstract/interface.jl")
