@@ -1,5 +1,3 @@
-QUBOTools.backend(sampler::AutomaticSampler) = sampler.backend
-
 function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
     if !isqubolike(model)
         # Throws default massage (ToQUBO.jl advertisement 😎)
@@ -78,8 +76,8 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
     )
 end
 
-function QUBOTools.backend(::X) where {X<:AutomaticSampler}
-    error("'QUBOTools.backend' not implemented for '$X'")
+function QUBOTools.backend(sampler::AutomaticSampler)
+    return sampler.backend
 end
 
 # ~*~ :: MathOptInterface :: ~*~ #
