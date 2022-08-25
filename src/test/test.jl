@@ -4,6 +4,7 @@ include("interface/anneal.jl")
 @doc raw"""
 """ function test end
 
-function test(S::Type{<:AbstractSampler})
-    test_moi_interface(S)
+function Anneal.test(optimizer::Type{<:AbstractSampler})
+    __test_moi_interface(optimizer)
+    __test_anneal_interface(optimizer)
 end

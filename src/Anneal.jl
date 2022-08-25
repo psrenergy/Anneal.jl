@@ -37,6 +37,9 @@ include("interface/automatic/MOI_wrapper.jl")
 # -*- Includes: Tests -*-
 include("test/test.jl")
 
+# -*- Includes: Benchmark -*-
+include("benchmark/benchmark.jl")
+
 # -*- Includes: Submodules -*-
 include("samplers/IdentitySampler.jl")
 include("samplers/ExactSampler.jl")
