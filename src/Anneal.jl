@@ -11,8 +11,6 @@ const SAT{T} = MOI.ScalarAffineTerm{T}
 const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 
-import Test
-
 # ~*~ Imports: QUBOTools Backend ~*~ # 
 import QUBOTools: QUBOTools, SampleSet, Sample
 import QUBOTools: ising, qubo, energy, backend

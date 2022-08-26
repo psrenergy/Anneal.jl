@@ -14,7 +14,19 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     N = 2^n - 1
 
     # ~*~ Sample Random States ~*~ #
-    results = @timed Vector{Int}[digits(i; base = 2, pad = n) for i = 0:N]
+    results = @timed begin
+        states = Vector{Int}[digits(i; base=2, pad=n) for i = 0:N]
+
+        Anneal.Sample{Int,T}[
+            Anneal.Sample{Int,T}(
+                ψ,
+                1,
+                Anneal.energy(ψ, sampler)
+            )
+            for ψ in states
+        ]
+    end
+
     samples = results.value
 
     # ~*~ Write Solution Metadata ~*~ #
@@ -25,7 +37,7 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     )
 
     # ~*~ Return Sample Set ~*~ #
-    Anneal.SampleSet{Int,T}(sampler, samples, metadata)
+    return Anneal.SampleSet{Int,T}(samples, metadata)
 end
 
 end # module

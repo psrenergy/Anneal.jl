@@ -18,7 +18,7 @@ function QUBOTools.StandardQUBOModel{T}(model::MOI.ModelLike) where {T}
             cᵢ = a.coefficient
             xᵢ = a.variable
 
-            L[xᵢ] +=  cᵢ
+            L[xᵢ] += cᵢ
         end
 
         c += f.constant
@@ -199,7 +199,7 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.SolveTimeSec)
     end
 end
 
-function MOI.get(sampler::AutomaticSampler, vp::MOI.VariablePrimal, vi::VI)
+function MOI.get(sampler::AutomaticSampler{T}, vp::MOI.VariablePrimal, vi::VI) where T
     sampleset = QUBOTools.sampleset(sampler)
 
     ri = vp.result_index
@@ -216,24 +216,24 @@ function MOI.get(sampler::AutomaticSampler, vp::MOI.VariablePrimal, vi::VI)
         error("Variable index '$vi' not in model")
     end
 
-    return sampleset[ri].state[variable_map[vi]]
+    value = sampleset[ri].state[variable_map[vi]]
+
+    return convert(T, value)
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.NumberOfVariables)
-    QUBOTools.domain_size(sampler)
+    return QUBOTools.domain_size(sampler)
 end
 
 # ~*~ :: I/O :: ~*~ #
 function Base.write(filename::String, sampler::AutomaticSampler)
-    write(
+    return write(
         filename,
         convert(
             QUBOTools.infer_model_type(filename),
             QUBOTools.backend(sampler),
         )
     )
-
-    nothing
 end
 
 function Base.read!(filename::String, sampler::AutomaticSampler)

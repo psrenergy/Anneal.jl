@@ -1,5 +1,5 @@
 function test_exact_sampler()
     @testset "Exact Sampler" verbose = true begin
-    Anneal.test(Anneal.ExactSampler.Optimizer)
+        Anneal.test(Anneal.ExactSampler.Optimizer; examples=true)
     end
 end
