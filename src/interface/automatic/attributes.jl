@@ -112,12 +112,12 @@ struct SamplerAttributeData{T}
     optattrs::Dict{AbstractSamplerAttribute,SamplerAttribute}
     moiattrs::MOIAttributeData{T}
 
-    function SamplerAttributeData{T}(attrs::Vector{<:SamplerAttribute}) where {T}
+    function SamplerAttributeData{T}(attrs::Vector) where {T}
         rawattrs = Dict{String,SamplerAttribute}()
         optattrs = Dict{AbstractSamplerAttribute,SamplerAttribute}()
         moiattrs = MOIAttributeData{T}()
 
-        for attr in attrs
+        for attr::SamplerAttribute in attrs
             if !isnothing(attr.rawattr)
                 rawattrs[attr.rawattr] = attr
             end

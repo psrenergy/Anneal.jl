@@ -72,7 +72,7 @@ function MOI.empty!(sampler::AutomaticSampler)
 end
 
 function MOI.is_empty(sampler::AutomaticSampler)
-    isempty(QUBOTools.backend(sampler))
+    return isempty(QUBOTools.backend(sampler))
 end
 
 function MOI.optimize!(sampler::AutomaticSampler)
@@ -93,12 +93,12 @@ function Base.show(io::IO, sampler::AutomaticSampler)
     print(
         io,
         """
-        $(MOI.get(sampler, MOI.SolverName())) Binary Quadratic Sampler
+        Solver: $(MOI.get(sampler, MOI.SolverName()))
 
         with backend:
+        $(QUBOTools.backend(sampler))
         """
     )
-    print(io, QUBOTools.backend(sampler))
 end
 
 function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {T}

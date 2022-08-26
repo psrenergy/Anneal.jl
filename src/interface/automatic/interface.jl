@@ -9,15 +9,12 @@ function __parse_results(sampler::AutomaticSampler{T}, samples::Vector{Vector{<:
     Anneal.SampleSet{Int, T}(samples, sampler)
 end
 
-function Anneal.sample(::AutomaticSampler)
-    error("'Anneal.sample' is not implemented")
-end
-
 function Anneal.sample!(sampler::AutomaticSampler)
     results = @timed Anneal.sample(sampler)
 
     sampleset = Anneal.__parse_results(sampler, results.value)::Anneal.SampleSet
 
+    # ~*~ Time metadata ~*~ #
     if !haskey(sampleset.metadata, "time")
         sampleset.metadata["time"] = Dict{String, Any}(
             "total" => results.time,
