@@ -1,3 +1,3 @@
-function test_jump(Optimizer::Type{<:AbstractSampler})
+function test_jump_interface()
     
 end

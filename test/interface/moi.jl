@@ -1,3 +1,3 @@
-function test_moi(Optimizer::Type{<:AbstractSampler})
+function test_moi_interface()
     
 end

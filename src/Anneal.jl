@@ -10,30 +10,41 @@ const SAF{T} = MOI.ScalarAffineFunction{T}
 const SAT{T} = MOI.ScalarAffineTerm{T}
 const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
-const Maybe{T} = Union{T, Nothing}
 
 import Test
 
-# -*- Exports: Interface -*-
-export AbstractSampler, AbstractSamplerAttribute, @anew
+# ~*~ Imports: QUBOTools Backend ~*~ # 
+import QUBOTools: QUBOTools, SampleSet, Sample
+import QUBOTools: ising, qubo
 
-# -*- Exports: Submodules -*-
-export ExactSampler, RandomSampler, IdentitySampler
-export SimulatedAnnealer
+QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 
-# -*- Includes: Anneal -*-
-include(joinpath("lib", "error.jl"))
-include(joinpath("lib", "tools.jl"))
-include(joinpath("lib", "samples.jl"))
-include(joinpath("interface", "interface.jl"))
-include(joinpath("interface", "MOI_wrapper.jl"))
-include(joinpath("interface", "macros.jl"))
-include(joinpath("interface", "tests.jl"))
+# -*- Exports: Interface -*- #
+export AbstractSampler, Sampler, @anew
+
+# -*- Exports: Submodules -*- #
+export IdentitySampler, ExactSampler, RandomSampler
+
+# -*- Includes: Anneal -*- #
+include("lib/error.jl")
+include("lib/tools.jl")
+include("interface/abstract/interface.jl")
+include("interface/abstract/MOI_wrapper.jl")
+include("interface/automatic/interface.jl")
+include("interface/automatic/attributes.jl")
+include("interface/automatic/macros.jl")
+include("interface/automatic/QUBOTools_wrapper.jl")
+include("interface/automatic/MOI_wrapper.jl")
+
+# -*- Includes: Tests -*-
+include("test/test.jl")
+
+# -*- Includes: Benchmark -*-
+include("benchmark/benchmark.jl")
 
 # -*- Includes: Submodules -*-
-include(joinpath("samplers", "random", "random.jl"))
-include(joinpath("samplers", "exact", "exact.jl"))
-include(joinpath("samplers", "identity", "identity.jl"))
-include(joinpath("samplers", "simulated", "simulated.jl"))
+include("samplers/IdentitySampler.jl")
+include("samplers/ExactSampler.jl")
+include("samplers/RandomSampler.jl")
 
 end # module
