@@ -39,7 +39,7 @@ function __anew_parse_param(::Val{:version}, value)
     if value isa VersionNumber
         return value
     else
-        __anew_error("parameter 'name' must be a 'VersionNumber'")
+        __anew_error("parameter 'version' must be a 'VersionNumber'")
     end
 end
 
