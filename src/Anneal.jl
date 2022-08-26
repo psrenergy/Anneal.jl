@@ -13,9 +13,11 @@ const CI = MOI.ConstraintIndex
 
 import Test
 
-# ~*~ Imports: Backend ~*~ # 
+# ~*~ Imports: QUBOTools Backend ~*~ # 
 import QUBOTools: QUBOTools, SampleSet, Sample
 import QUBOTools: ising, qubo
+
+QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 
 # -*- Exports: Interface -*- #
 export AbstractSampler, Sampler, @anew
