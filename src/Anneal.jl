@@ -20,7 +20,7 @@ import QUBOTools: ising, qubo, energy, backend
 QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 
 # -*- Exports: Interface -*- #
-export AbstractSampler, Sampler, @anew
+export AbstractSampler, @anew
 
 # -*- Exports: Submodules -*- #
 export IdentitySampler, ExactSampler, RandomSampler
