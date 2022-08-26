@@ -70,13 +70,20 @@ end
 ```
 
 ### Samplers
+
 | Module Name       | Descripition                                                                                                                                               | Package                                             | Status |
 | :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :----: |
+| `DWaveNeal`       | D-Wave's open-source Simulated Annealing sampler. | [DWaveNeal.jl](https://github.com/psrenergy/DWaveNeal.jl) | ⌛ |
 | `ExactSampler`    | Sequentially samples all possible states by exaustive enumeration. Finds the global optimum but can't be used for models with much more than 20 variables. | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
 | `IdentitySampler` | Samples the exact same state defined as warm start.                                                                                                        | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
 | `RandomSampler`   | Randomly samples states by regular or biased coin tossing. It is commonly used to compare new solving methods to a _random guessing_ baseline.             | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
 
+If you implemented your own sampler interface using [Anneal.jl](https://github.com/psrenergy/Anneal.jl), consider opening an [issue](https://github.com/psrenergy/Anneal.jl/issues) or submiting a [pull request](https://github.com/psrenergy/Anneal.jl/pulls) to add it to the list.
+
+
 ### Interface (aka. integrating your own sampler)
+There are two options to consider when using [Anneal.jl](https://github.com/psrenergy/Anneal.jl), namely `AbstractSampler` and `AutomaticSampler`.
+As the diagram below indicates, the _automatic_ type is a subtype of the general, abstract one.
 
 ```mermaid
 flowchart TD;
@@ -84,17 +91,22 @@ flowchart TD;
     ABSTRACT["<code>AbstractSampler{T}</code>"];
     AUTOMATIC["<code>AutomaticSampler{T}</code>"];
 
-    EXACT(["<code>ExactSampler{T}</code>"]);
-    IDENTITY(["<code>IdentiySampler{T}</code>"]);
-    RANDOM(["<code>RandomSampler{T}</code>"]);
+    EXACT(["<code>ExactSampler.Optimizer{T}</code>"]);
+    IDENTITY(["<code>IdentiySampler.Optimizer{T}</code>"]);
+    RANDOM(["<code>RandomSampler.Optimizer{T}</code>"]);
+    DWAVENEAL(["<code>DWaveNeal.Optimizer{T}</code>"]);
 
     OPTIMIZER --> ABSTRACT;
     ABSTRACT  --> AUTOMATIC;
 
-    AUTOMATIC ---> EXACT;
-    AUTOMATIC ---> IDENTITY;
-    AUTOMATIC ---> RANDOM;
+    AUTOMATIC --> EXACT;
+    AUTOMATIC --> IDENTITY;
+    AUTOMATIC --> RANDOM;
+    AUTOMATIC ---> DWAVENEAL;
 ```
+
+#### Automatic Interface
+
 
 <div align="center">
     <h2>PSR Quantum Optimization Toolchain</h2>
