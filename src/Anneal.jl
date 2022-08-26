@@ -15,7 +15,7 @@ import Test
 
 # ~*~ Imports: QUBOTools Backend ~*~ # 
 import QUBOTools: QUBOTools, SampleSet, Sample
-import QUBOTools: ising, qubo
+import QUBOTools: ising, qubo, energy, backend
 
 QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 
