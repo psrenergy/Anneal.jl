@@ -112,12 +112,12 @@ struct SamplerAttributeData{T}
     optattrs::Dict{AbstractSamplerAttribute,SamplerAttribute}
     moiattrs::MOIAttributeData{T}
 
-    function SamplerAttributeData{T}(attrs::Vector{<:SamplerAttribute}) where {T}
+    function SamplerAttributeData{T}(attrs::Vector) where {T}
         rawattrs = Dict{String,SamplerAttribute}()
         optattrs = Dict{AbstractSamplerAttribute,SamplerAttribute}()
         moiattrs = MOIAttributeData{T}()
 
-        for attr in attrs
+        for attr::SamplerAttribute in attrs
             if !isnothing(attr.rawattr)
                 rawattrs[attr.rawattr] = attr
             end
@@ -165,11 +165,11 @@ function MOI.get(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute)
 end
 
 # ~*~ :: set :: ~*~ ::
-function Base.setindex!(attrs::SamplerAttributeData, attr::MOI_ATTRIBUTES, value)
+function Base.setindex!(attrs::SamplerAttributeData, value, attr::MOI_ATTRIBUTES)
     attrs.moiattrs[attr] = value
 end
 
-function Base.setindex!(attrs::SamplerAttributeData, attr::AbstractSamplerAttribute, value)
+function Base.setindex!(attrs::SamplerAttributeData, value, attr::AbstractSamplerAttribute)
     if haskey(attrs.optattrs, attr)
         data = attrs.optattrs[attr]
 
@@ -179,7 +179,7 @@ function Base.setindex!(attrs::SamplerAttributeData, attr::AbstractSamplerAttrib
     end
 end
 
-function Base.setindex!(attrs::SamplerAttributeData, raw_attr::String, value)
+function Base.setindex!(attrs::SamplerAttributeData, value, raw_attr::String)
     if haskey(attrs.rawattrs, raw_attr)
         data = attrs.rawattrs[raw_attr]
 
@@ -189,7 +189,7 @@ function Base.setindex!(attrs::SamplerAttributeData, raw_attr::String, value)
     end
 end
 
-function MOI.get(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute}, value)
+function MOI.set(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute}, value)
     sampler.attrs[attr] = value
 end
 

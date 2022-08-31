@@ -2,9 +2,10 @@ const __ANEW_REGISTRY = Set{Module}()
 
 const __ANEW_DEFAULT_PARAMS() = Dict{Symbol,Any}(
     :name => "Binary Quadratic Sampler",
-    :version => v"1.0.0",
+    :sense => :min,
     :domain => :bool,
-    :attributes => Dict{Symbol, Any}[],
+    :version => v"1.0.0",
+    :attributes => Dict{Symbol,Any}[],
 )
 
 function __anew_error(msg::String)
@@ -43,25 +44,41 @@ function __anew_parse_param(::Val{:version}, value)
     end
 end
 
-function __anew_parse_param(::Val{:domain}, value)
-    value = if value isa QuoteNode
-        value.value
+function __anew_parse_param(::Val{:sense}, _value)
+    value = if _value isa QuoteNode
+        _value.value
     elseif value isa String
-        Symbol(value)
+        Symbol(_value)
     else
-        value
+        _value
     end
 
-    if value isa Symbol && (value === :bool || value === :spin)
+    if (value === :min || value === :max)
         return value
     else
-        __anew_error("parameter 'domain' must be either ':bool' or ':spin', not '$value'")
+        __anew_error("parameter 'sense' must be either ':min' or ':max', not '$_value'")
+    end
+end
+
+function __anew_parse_param(::Val{:domain}, _value)
+    value = if _value isa QuoteNode
+        _value.value
+    elseif _value isa String
+        Symbol(_value)
+    else
+        _value
+    end
+
+    if (value === :bool || VALUE === :spin)
+        return value
+    else
+        __anew_error("parameter 'domain' must be either ':bool' or ':spin', not '$_value'")
     end
 end
 
 function __anew_parse_param(::Val{:attributes}, value)
     if value isa Expr && value.head === :block
-        return Dict{Symbol, Any}[
+        return Dict{Symbol,Any}[
             attr for attr in __anew_parse_attr.(value.args)
             if !isnothing(attr)
         ]
@@ -79,7 +96,7 @@ function __anew_parse_attr(stmt)
 
     attr, default = stmt.args
 
-    type    = nothing
+    type = nothing
     optattr = nothing
     rawattr = nothing
 
@@ -129,8 +146,8 @@ function __anew_parse_attr(stmt)
         __anew_error("invalid attribute signature '$attr'")
     end
 
-    return Dict{Symbol, Any}(
-        :type    => type,
+    return Dict{Symbol,Any}(
+        :type => type,
         :default => default,
         :optattr => optattr,
         :rawattr => rawattr,
@@ -156,6 +173,18 @@ function __anew_parse_params(block::Expr)
         else
             __anew_error("sampler parameters must be `key = value` pairs")
         end
+    end
+
+    params[:sense] = if params[:sense] === :min
+        MOI.MIN_SENSE
+    else
+        MOI.MAX_SENSE
+    end
+
+    params[:domain] = if params[:domain] === :bool
+        QUBOTools.BoolDomain
+    elseif params[:domain] === :spin
+        QUBOTools.SpinDomain
     end
 
     return params
@@ -206,7 +235,7 @@ function __anew_parse(id, block)
 end
 
 function __anew_attr(attr)
-    type    = attr[:type]
+    type = attr[:type]
     default = attr[:default]
     optattr = attr[:optattr]
     rawattr = attr[:rawattr]
@@ -270,8 +299,9 @@ Example
 ```
 Anneal.@anew Optimizer begin
     name = "Super Sampler"
-    version = v"1.0.2"
+    sense = :max
     domain = :spin
+    version = v"1.0.2"
     attributes = begin
         NumberOfReads["num_reads]::Integer = 1_000
         SuperAttribute["super_attr"] = nothing
@@ -296,16 +326,9 @@ macro anew(raw_args...)
     id, params = __anew_parse(args...)
 
     name = params[:name]
-
+    sense = params[:sense]
+    domain = params[:domain]
     version = params[:version]
-
-    domain = if params[:domain] === :bool
-        :(QUBOTools.BoolDomain)
-    elseif params[:domain] === :spin
-        :(QUBOTools.SpinDomain)
-    else
-        error("domain ≂̸ :spin, :bool")
-    end
 
     attributes = __anew_attr.(params[:attributes])
 
@@ -314,29 +337,30 @@ macro anew(raw_args...)
     quote
         const __SAMPLER_ATTRIBUTES = Anneal.SamplerAttribute[]
 
-        struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
-            # ~*~ QUBOTools Backend ~*~ #
-            backend::QUBOTools.StandardQUBOModel{MOI.VariableIndex,Int,T,$(domain)}
+        mutable struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
+            # ~*~ QUBOTools Backend model ~*~ #
+            model::Union{QUBOTools.StandardQUBOModel,Nothing}
             # ~*~ Attributes ~*~ #
             attrs::Anneal.SamplerAttributeData{T}
 
             function $(esc(id)){T}(args...; kws...) where {T}
-                new{T}(
-                    QUBOTools.StandardQUBOModel{MOI.VariableIndex,Int,T,$(domain)}(),
+                return new{T}(
+                    nothing,
                     Anneal.SamplerAttributeData{T}(
                         copy.(__SAMPLER_ATTRIBUTES)
-                    ),
+                    )
                 )
             end
 
             function $(esc(id))(args...; kws...)
-                $(esc(id)){Float64}(args...; kws...)
+                return $(esc(id)){Float64}(args...; kws...)
             end
         end
 
-        QUBOTools.backend(sampler::$(esc(id))) = sampler.backend
-
-        MOI.get(::$(esc(id)), ::MOI.SolverName)    = $(esc(name))
+        Anneal.solver_sense(::$(esc(id))) = $(esc(sense))
+        Anneal.solver_domain(::$(esc(id))) = $(esc(domain))
+        
+        MOI.get(::$(esc(id)), ::MOI.SolverName) = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))
 
         $(attributes...)

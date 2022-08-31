@@ -6,6 +6,8 @@ const MOI = MathOptInterface
 
 Anneal.@anew Optimizer begin
     name = "Exact Sampler"
+    sense = :min
+    domain = :bool
 end
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
@@ -14,7 +16,7 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     N = 2^n - 1
 
     # ~*~ Sample Random States ~*~ #
-    results = @timed Vector{Int}[digits(i; base = 2, pad = n) for i = 0:N]
+    results = @timed Vector{Int}[digits(i; base=2, pad=n) for i = 0:N]
     samples = results.value
 
     # ~*~ Write Solution Metadata ~*~ #
@@ -25,7 +27,7 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     )
 
     # ~*~ Return Sample Set ~*~ #
-    Anneal.SampleSet{Int,T}(sampler, samples, metadata)
+    return Anneal.SampleSet{Int,T}(sampler, samples, metadata)
 end
 
 end # module
