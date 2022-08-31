@@ -1,30 +1,29 @@
 abstract type AutomaticSampler{T} <: AbstractSampler{T} end
 
 @doc raw"""
-""" function __parse_results end
+    model_sense(sampler)::Union{Symbol,Nothing}
+""" function model_sense end
 
-__parse_results(::AutomaticSampler, sampleset::Anneal.SampleSet) = sampleset
-
-function __parse_results(sampler::AutomaticSampler{T}, samples::Vector{Vector{<:Integer}}) where T
-    Anneal.SampleSet{Int, T}(samples, sampler)
+function Anneal.model_sense(sampler::AutomaticSampler)
+    return MOI.get(sampler, MOI.ObjectiveSense())
 end
 
-function Anneal.sample!(sampler::AutomaticSampler)
-    results = @timed Anneal.sample(sampler)
+@doc raw"""
+    model_domain(sampler)::Union{Symbol,Nothing}
+""" function model_domain end
 
-    sampleset = Anneal.__parse_results(sampler, results.value)::Anneal.SampleSet
-
-    # ~*~ Time metadata ~*~ #
-    if !haskey(sampleset.metadata, "time")
-        sampleset.metadata["time"] = Dict{String, Any}(
-            "total" => results.time,
-        )
-    elseif !haskey(sampleset.metadata["time"], "total")
-        sampleset.metadata["time"]["total"] = results.time
-    end
-
-    backend = QUBOTools.backend(sampler)
-    backend.sampleset = sampleset
-
-    nothing
+function Anneal.model_domain(sampler::AutomaticSampler)
+    return QUBOTools.domain(sampler)
 end
+
+@doc raw"""
+    solver_sense(sampler)::Union{Symbol,Nothing}
+""" function solver_sense end
+
+Anneal.solver_sense(::AutomaticSampler) = nothing
+
+@doc raw"""
+    solver_domain(sampler)::Union{Symbol,Nothing}
+""" function solver_domain end
+
+Anneal.solver_domain(::AutomaticSampler) = nothing

@@ -165,11 +165,11 @@ function MOI.get(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute)
 end
 
 # ~*~ :: set :: ~*~ ::
-function Base.setindex!(attrs::SamplerAttributeData, attr::MOI_ATTRIBUTES, value)
+function Base.setindex!(attrs::SamplerAttributeData, value, attr::MOI_ATTRIBUTES)
     attrs.moiattrs[attr] = value
 end
 
-function Base.setindex!(attrs::SamplerAttributeData, attr::AbstractSamplerAttribute, value)
+function Base.setindex!(attrs::SamplerAttributeData, value, attr::AbstractSamplerAttribute)
     if haskey(attrs.optattrs, attr)
         data = attrs.optattrs[attr]
 
@@ -179,7 +179,7 @@ function Base.setindex!(attrs::SamplerAttributeData, attr::AbstractSamplerAttrib
     end
 end
 
-function Base.setindex!(attrs::SamplerAttributeData, raw_attr::String, value)
+function Base.setindex!(attrs::SamplerAttributeData, value, raw_attr::String)
     if haskey(attrs.rawattrs, raw_attr)
         data = attrs.rawattrs[raw_attr]
 
@@ -189,10 +189,10 @@ function Base.setindex!(attrs::SamplerAttributeData, raw_attr::String, value)
     end
 end
 
-function MOI.get(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute}, value)
+function MOI.get(sampler::AutomaticSampler, value, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute})
     sampler.attrs[attr] = value
 end
 
-function MOI.set(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute, value)
+function MOI.set(sampler::AutomaticSampler, value, attr::MOI.RawOptimizerAttribute)
     sampler.attrs[attr.name] = value
 end
