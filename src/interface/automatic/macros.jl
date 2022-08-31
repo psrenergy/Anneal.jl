@@ -53,10 +53,8 @@ function __anew_parse_param(::Val{:sense}, _value)
         _value
     end
 
-    if value === :min
-        return :(MOI.MIN_SENSE)
-    elseif value === :max
-        return :(MOI.MAX_SENSE)
+    if (value === :min || value === :max)
+        return value
     else
         __anew_error("parameter 'sense' must be either ':min' or ':max', not '$_value'")
     end
@@ -71,10 +69,8 @@ function __anew_parse_param(::Val{:domain}, _value)
         _value
     end
 
-    if value === :bool
-        return :(QUBOTools.BoolDomain)
-    elseif value === :spin
-        return :(QUBOTools.SpinDomain)
+    if (value === :bool || VALUE === :spin)
+        return value
     else
         __anew_error("parameter 'domain' must be either ':bool' or ':spin', not '$_value'")
     end
@@ -177,6 +173,18 @@ function __anew_parse_params(block::Expr)
         else
             __anew_error("sampler parameters must be `key = value` pairs")
         end
+    end
+
+    params[:sense] = if params[:sense] === :min
+        MOI.MIN_SENSE
+    else
+        MOI.MAX_SENSE
+    end
+
+    params[:domain] = if params[:domain] === :bool
+        QUBOTools.BoolDomain
+    elseif params[:domain] === :spin
+        QUBOTools.SpinDomain
     end
 
     return params

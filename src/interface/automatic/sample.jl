@@ -4,30 +4,42 @@
 """ function __parse_results end
 
 function __parse_results(
-    sampler::AutomaticSampler,
-    results::Anneal.SampleSet
-)
-    results = QUBOTools.swap_sense(
-        Anneal.solver_sense(sampler),
-        Anneal.model_sense(sampler),
-        results,
-    )
+    sampler::AutomaticSampler{T},
+    results::Anneal.SampleSet{U,T},
+) where {U,T}
+    if Anneal.model_domain(sampler) === Anneal.solver_domain(sampler)
+        return results
+    elseif Anneal.model_domain(sampler) === QUBOTools.SpinDomain
+        samples = Anneal.Sample{U,T}[
+            Anneal.Sample{U,T}(
+                (2 .* sample.state) .- 1,
+                sample.reads,
+                sample.value,
+            )
+            for sample in results.samples
+        ]
+    elseif Anneal.model_domain(sampler) === QUBOTools.BoolDomain
+        samples = Anneal.Sample{U,T}[
+            Anneal.Sample{U,T}(
+                (sample.state .+ 1) .÷ 2,
+                sample.reads,
+                sample.value,
+            )
+            for sample in results.samples
+        ]
+    end
 
-    results = QUBOTools.swap_domain(
-        Anneal.solver_domain(sampler),
-        Anneal.model_domain(sampler),
-        results,
+    return Anneal.SampleSet{U,T}(
+        samples,
+        deepcopy(results.metadata),
     )
-
-    return results
 end
 
 function __parse_results(
     sampler::AutomaticSampler{T},
-    results::Vector{Vector{U}}
-) where {T,U<:Integer}
-
-    return Anneal.SampleSet{U,T}(results, sampler)
+    results::Vector{Vector{U}},
+) where {T,U}
+    return Anneal.SampleSet{U,T}(sampler, results)
 end
 
 function Anneal.sample!(sampler::AutomaticSampler)
@@ -44,12 +56,8 @@ function Anneal.sample!(sampler::AutomaticSampler)
     end
 
     # ~*~ Update sampleset ~*~ #
-    QUBOTools.sample!(
-        sampler,
-        sampleset;
-        sense=sampler.sense,
-        domain=sampler.domain
-    )
+    backend = QUBOTools.backend(sampler)
+    backend.sampleset = sampleset
 
     nothing
 end
