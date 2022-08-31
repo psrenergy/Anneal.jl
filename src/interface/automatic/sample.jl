@@ -1,58 +1,57 @@
+function Anneal.SampleSet{U,T}(
+    sampler::AutomaticSampler,
+    _states::Vector{Vector{U}},
+    metadata::Union{Dict{String,Any},Nothing}=nothing,
+) where {U,T}
+    states = QUBOTools.swap_domain(
+        Anneal.solver_domain(sampler),
+        Anneal.model_domain(sampler),
+        _states
+    )
+
+    samples = Anneal.Sample{U,T}[
+        Anneal.Sample{U,T}(state, 1, Anneal.energy(state, sampler))
+        for state in states
+    ]
+
+    return Anneal.SampleSet{U,T}(samples, metadata)
+end
+
 @doc raw"""
     __parse_results(sampler::AutomaticSampler, samples::Anneal.SampleSet)
     __parse_results(sampler::AutomaticSampler{T}, samples::Vector{Vector{U}}) where {T,U<:Integer}
 """ function __parse_results end
 
 function __parse_results(
-    sampler::AutomaticSampler{T},
+    ::AutomaticSampler{T},
     results::Anneal.SampleSet{U,T},
 ) where {U,T}
-    if Anneal.model_domain(sampler) === Anneal.solver_domain(sampler)
-        return results
-    elseif Anneal.model_domain(sampler) === QUBOTools.SpinDomain
-        samples = Anneal.Sample{U,T}[
-            Anneal.Sample{U,T}(
-                (2 .* sample.state) .- 1,
-                sample.reads,
-                sample.value,
-            )
-            for sample in results.samples
-        ]
-    elseif Anneal.model_domain(sampler) === QUBOTools.BoolDomain
-        samples = Anneal.Sample{U,T}[
-            Anneal.Sample{U,T}(
-                (sample.state .+ 1) .÷ 2,
-                sample.reads,
-                sample.value,
-            )
-            for sample in results.samples
-        ]
-    end
-
-    return Anneal.SampleSet{U,T}(
-        samples,
-        deepcopy(results.metadata),
-    )
+    return results
 end
 
 function __parse_results(
     sampler::AutomaticSampler{T},
     results::Vector{Vector{U}},
-) where {T,U}
+) where {U,T}
     return Anneal.SampleSet{U,T}(sampler, results)
 end
 
 function Anneal.sample!(sampler::AutomaticSampler)
-    results = @timed Anneal.sample(sampler)
-    sampleset = Anneal.__parse_results(sampler, results.value)
+    # ~*~ Timing Information ~*~ #
+    time_data = Dict{String,Any}()
+    
+    # ~*~ Run Sampling ~*~ # 
+    sampleset = let results = @timed Anneal.sample(sampler)
+        time_data["total"] = results.time
+        
+        Anneal.__parse_results(sampler, results.value)
+    end
 
     # ~*~ Time metadata ~*~ #
     if !haskey(sampleset.metadata, "time")
-        sampleset.metadata["time"] = Dict{String,Any}(
-            "total" => results.time,
-        )
+        sampleset.metadata["time"] = time_data
     elseif !haskey(sampleset.metadata["time"], "total")
-        sampleset.metadata["time"]["total"] = results.time
+        sampleset.metadata["time"]["total"] = time_data["total"]
     end
 
     # ~*~ Update sampleset ~*~ #

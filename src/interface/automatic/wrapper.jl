@@ -22,7 +22,7 @@ end
 
 function MOI.optimize!(sampler::AutomaticSampler, model::MOI.ModelLike)
     index_map = MOI.copy_to(sampler, model)
-    
+
     MOI.optimize!(sampler)
 
     return (index_map, false)
@@ -148,7 +148,7 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.SolveTimeSec)
     end
 end
 
-function MOI.get(sampler::AutomaticSampler{T}, vp::MOI.VariablePrimal, vi::VI) where T
+function MOI.get(sampler::AutomaticSampler{T}, vp::MOI.VariablePrimal, vi::VI) where {T}
     sampleset = QUBOTools.sampleset(sampler)::SampleSet
 
     ri = vp.result_index
@@ -190,6 +190,6 @@ function Base.read!(filename::String, sampler::AutomaticSampler)
     target = QUBOTools.backend(sampler)::QUBOTools.StandardQUBOModel
 
     copy!(target, source)
-    
+
     nothing
 end
