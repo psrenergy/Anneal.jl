@@ -6,7 +6,8 @@ const MOI = MathOptInterface
 
 Anneal.@anew Optimizer begin
     name = "Random Sampler"
-
+    sense = :min
+    domain = :bool
     attributes = begin
         NumberOfReads["num_reads"]::Integer = 1_000
     end
