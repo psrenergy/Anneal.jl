@@ -26,12 +26,10 @@ This package aims to provide a common [MOI](https://github.com/jump-dev/MathOptI
 ### QUBO
 Problems assigned to solvers defined within Anneal.jl's interface are given by
 
-$$
-\begin{array}{rl}
+$$\begin{array}{rl}
 \text{QUBO}:~ \displaystyle \min_{\vec{x}} & \displaystyle \alpha \left[{ \vec{x}' Q \vec{x} + \beta }\right] \\
                                \text{s.t.} & \displaystyle \vec{x} \in S \cong \mathbb{B}^{n}
-\end{array}
-$$
+\end{array}$$
 
 where $Q \in \mathbb{R}^{n \times n}$ is a symmetric matrix. Maximization is automatically converted to minimization in a transparent fashion during runtime.
 
