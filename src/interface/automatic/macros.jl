@@ -69,7 +69,7 @@ function __anew_parse_param(::Val{:domain}, _value)
         _value
     end
 
-    if (value === :bool || VALUE === :spin)
+    if (value === :bool || value === :spin)
         return value
     else
         __anew_error("parameter 'domain' must be either ':bool' or ':spin', not '$_value'")
