@@ -1,9 +1,9 @@
 module Anneal
 
+# ~*~ Imports: MathOptInterface ~*~ #
 using MathOptInterface
 const MOI = MathOptInterface
 const MOIU = MOI.Utilities
-
 const SQF{T} = MOI.ScalarQuadraticFunction{T}
 const SQT{T} = MOI.ScalarQuadraticTerm{T}
 const SAF{T} = MOI.ScalarAffineFunction{T}
@@ -11,9 +11,12 @@ const SAT{T} = MOI.ScalarAffineTerm{T}
 const VI = MOI.VariableIndex
 const CI = MOI.ConstraintIndex
 
+# ~*~ Exports: MathOptInterface ~*~ #
+export MOI
+
 # ~*~ Imports: QUBOTools Backend ~*~ # 
-import QUBOTools: QUBOTools, SampleSet, Sample
-import QUBOTools: backend, ising, qubo, energy
+import QUBOTools: QUBOTools, SampleSet, Sample, backend
+import QUBOTools: ising, qubo, energy, adjacency
 
 # ~*~ See:
 # https://github.com/jump-dev/MathOptInterface.jl/issues/1985
@@ -34,7 +37,8 @@ include("interface/automatic/sample.jl")
 include("interface/automatic/wrapper.jl")
 
 # -*- Exports: Interface -*- #
-export AbstractSampler, @anew
+export AbstractSampler
+export @anew
 
 # -*- Includes: Tests -*-
 include("test/test.jl")
@@ -48,6 +52,8 @@ include("samplers/ExactSampler.jl")
 include("samplers/RandomSampler.jl")
 
 # -*- Exports: Submodules -*- #
-export IdentitySampler, ExactSampler, RandomSampler
+export IdentitySampler
+export ExactSampler
+export RandomSampler
 
 end # module
