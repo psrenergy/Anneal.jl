@@ -4,7 +4,7 @@
 
 [Anneal](/)'s logo aims to illustrate the annealing process with a progressive addition of the energy landscape.
 
-[![ToQUBO.jl](logo.svg)](/docs/src/assets)
+[![Anneal.jl](logo.svg)](/docs/src/assets)
 
 ## Colors
 
