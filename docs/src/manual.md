@@ -26,8 +26,8 @@ Even though only QUBO formulations are supported as input, Anneal provides inter
 Model validation and trivial QUBO/Insing conversion is made using the functions below.
 ```@docs
 Anneal.isqubo
-Anneal.qubo_normal_form
-Anneal.ising_normal_form
+Anneal.qubo
+Anneal.ising
 ```
 
 ## Defining a new sampler interface
@@ -53,28 +53,38 @@ module SuperAnnealer
         "Super Annealer"
     end
 
-    function MOI.get(::Optimizer, MOI.SolverVersion)
-        v"0.1.0" # Version strings are welcome!
-    end
+    function Anneal.sample(sampler::Optimizer{T}) where {T}
+        # ~ Is your annealer running on the Ising Model? Have this:
+        h, J = Anneal.ising(
+            Dict, # Here we opt for a sparse, dictionary representation 
+            T,    # The type for coefficients
+            sampler
+        )
 
-    function MOI.get(sampler::Optimizer, MOI.RawSolver)
-        # Usually the sampler itself, since we are prtty much low-level here.
-        # If you call another optimizer under the hood, you might want to return it.
-        sampler 
-    end
-
-    function Anneal.sample(sampler::Optimizer)
-        # Is your annealer running on the Ising Model? Have this:
-        s, h, J, c = Anneal.ising(sampler)
-
-        n = MOI.get(sampler, NumberOfReads())
+        n    = MOI.get(sampler, NumberOfReads())
         attr = MOI.get(sampler, SuperAttribute())
 
-        t0 = time()
-        results = [super_sample(h, J, attr) for i = 1:n]
-        t1 = time()
+        result = @timed Vector{Int}[super_sample(h, J; attr=attr) for i = 1:n]
+        states = result.value
 
-        return (results, t1 - t0)
+        metadata = Dict{String,Any}(
+            "time" => Dict{String,Any}(
+                "sampling" => result.time
+            ),
+            "origin" => "Super sampling method"
+        )
+
+        # ~ Here some magic happens:
+        #   By providing the sampler and a vector of states,
+        #   Anneal.jl computes the energy and arranges your
+        #   solutions automatically, following the variable
+        #   domain conventions specified previously.
+        # ~ The last parameter is for JSON-like metadata.
+        return Anneal.SampleSet{Int,T}(sampler, states, metadata)
+    end
+
+    function super_sample(h, J; kws...)
+        ... # your own magic here!
     end
 end
 ```
