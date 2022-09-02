@@ -4,7 +4,7 @@ const MOI_ATTRIBUTES = Union{
     MOI.Silent,
     MOI.TimeLimitSec,
     MOI.NumberOfThreads,
-    MOI.VariablePrimalStart,
+    # MOI.VariablePrimalStart,
 }
 
 mutable struct MOIAttributeData{T}
@@ -49,30 +49,30 @@ Base.getindex(moiattrs::MOIAttributeData, ::MOI.TimeLimitSec) = moiattrs.time_li
 Base.getindex(moiattrs::MOIAttributeData, ::MOI.NumberOfThreads) = moiattrs.number_of_threads
 
 function Base.getindex(moiattrs::MOIAttributeData{T}, ::MOI.VariablePrimalStart, vi::VI) where {T}
-    get(moiattrs.variable_primal_start, vi, zero(T))
+    if haskey(moiattrs.variable_primal_start, vi)
+        return moiattrs.variable_primal_start[vi]
+    else
+        error("No warm-start value for '$vi'")
+    end
 end
 
 # ~*~ :: set :: ~*~ ::
-function Base.setindex!(::MOIAttributeData, ::X, ::Any) where {X<:MOI.AbstractOptimizerAttribute}
-    error("Attribute '$X' is not supported")
-end
+Base.setindex!(moiattrs::MOIAttributeData, name::String, ::MOI.Name) = (moiattrs.name = name)
+Base.setindex!(moiattrs::MOIAttributeData, silent::Bool, ::MOI.Silent) = (moiattrs.silent = silent)
 
-Base.setindex!(moiattrs::MOIAttributeData, ::MOI.Name, name::String) = (moiattrs.name = name)
-Base.setindex!(moiattrs::MOIAttributeData, ::MOI.Silent, silent::Bool) = (moiattrs.silent = silent)
-
-function Base.setindex!(moiattrs::MOIAttributeData, ::MOI.TimeLimitSec, time_limit_sec::Union{Float64,Nothing})
-    @assert isnothing(time_limit_sec) || time_limit_sec >= 0
+function Base.setindex!(moiattrs::MOIAttributeData, time_limit_sec::Union{Float64,Nothing}, ::MOI.TimeLimitSec)
+    @assert isnothing(time_limit_sec) || time_limit_sec >= 0.0
 
     moiattrs.time_limit_sec = time_limit_sec
 end
 
-function Base.setindex!(moiattrs::MOIAttributeData, ::MOI.NumberOfThreads, number_of_threads::Integer)
+function Base.setindex!(moiattrs::MOIAttributeData, number_of_threads::Integer, ::MOI.NumberOfThreads)
     @assert number_of_threads > 0
 
     moiattrs.number_of_threads = number_of_threads
 end
 
-function Base.setindex!(moiattrs::MOIAttributeData{T}, ::MOI.VariablePrimalStart, vi::VI, value::T) where {T}
+function Base.setindex!(moiattrs::MOIAttributeData{T}, value::T, ::MOI.VariablePrimalStart, vi::VI) where {T}
     moiattrs.variable_primal_start[vi] = value
 end
 
@@ -132,8 +132,8 @@ struct SamplerAttributeData{T}
 end
 
 # ~*~ :: get :: ~*~ ::
-function Base.getindex(attrs::SamplerAttributeData, attr::MOI_ATTRIBUTES)
-    attrs.moiattrs[attr]
+function Base.getindex(attrs::SamplerAttributeData, attr::MOI_ATTRIBUTES, args...)
+    return attrs.moiattrs[attr, args...]
 end
 
 function Base.getindex(attrs::SamplerAttributeData, attr::AbstractSamplerAttribute)
@@ -156,17 +156,21 @@ function Base.getindex(attrs::SamplerAttributeData, raw_attr::String)
     end
 end
 
-function MOI.get(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute})
-    sampler.attrs[attr]
+function MOI.get(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES,AbstractSamplerAttribute})
+    return sampler.attrs[attr]
+end
+
+function MOI.get(sampler::AutomaticSampler, attr::MOI.VariablePrimalStart, vi::VI)
+    return sampler.attrs[attr, vi]
 end
 
 function MOI.get(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute)
-    sampler.attrs[attr.name]
+    return sampler.attrs[attr.name]
 end
 
 # ~*~ :: set :: ~*~ ::
-function Base.setindex!(attrs::SamplerAttributeData, value, attr::MOI_ATTRIBUTES)
-    attrs.moiattrs[attr] = value
+function Base.setindex!(attrs::SamplerAttributeData, value, attr::MOI_ATTRIBUTES, args...)
+    attrs.moiattrs[attr, args...] = value
 end
 
 function Base.setindex!(attrs::SamplerAttributeData, value, attr::AbstractSamplerAttribute)
@@ -189,8 +193,12 @@ function Base.setindex!(attrs::SamplerAttributeData, value, raw_attr::String)
     end
 end
 
-function MOI.set(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES, AbstractSamplerAttribute}, value)
+function MOI.set(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES,AbstractSamplerAttribute}, value)
     sampler.attrs[attr] = value
+end
+
+function MOI.set(sampler::AutomaticSampler, attr::MOI.VariablePrimalStart, vi::VI, value)
+    sampler.attrs[attr, vi] = value
 end
 
 function MOI.set(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute, value)
