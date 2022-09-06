@@ -1,6 +1,3 @@
-import Test
-import JuMP
-
 include("interface/moi.jl")
 include("interface/anneal.jl")
 
