@@ -127,6 +127,10 @@ function MOI.get(sampler::AutomaticSampler, ov::MOI.ObjectiveValue)
         error("Invalid result index '$ri'; There are $(length(sampleset)) solutions")
     end
 
+    if MOI.get(sampler, MOI.ObjectiveSense()) === MOI.MAX_SENSE
+        ri = length(sampleset) - ri + 1
+    end
+
     return sampleset[ri].value
 end
 
@@ -163,6 +167,10 @@ function MOI.get(sampler::AutomaticSampler{T}, vp::MOI.VariablePrimal, vi::VI) w
 
     if !haskey(variable_map, vi)
         error("Variable index '$vi' not in model")
+    end
+
+    if MOI.get(sampler, MOI.ObjectiveSense()) === MOI.MAX_SENSE
+        ri = length(sampleset) - ri + 1
     end
 
     value = sampleset[ri].state[variable_map[vi]]

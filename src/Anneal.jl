@@ -1,7 +1,8 @@
 module Anneal
 
 # ~*~ Imports: MathOptInterface ~*~ #
-using MathOptInterface
+import JuMP
+import MathOptInterface
 const MOI = MathOptInterface
 const MOIU = MOI.Utilities
 const SQF{T} = MOI.ScalarQuadraticFunction{T}
@@ -22,13 +23,20 @@ import QUBOTools: ising, qubo, energy, adjacency
 # https://github.com/jump-dev/MathOptInterface.jl/issues/1985
 QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 
-# -*- Includes: Anneal -*- #
+# ~*~ Imports: Tests + Benchmarking ~*~ #
+import Test
+
+# -*- Includes: Library -*- #
 include("lib/error.jl")
 include("lib/types.jl")
 include("lib/tools.jl")
 
+# -*- Exports: Spin Variables -*- #
+export Spin
+
+# -*- Includes: Interface -*- #
 include("interface/abstract/interface.jl")
-include("interface/abstract/MOI_wrapper.jl")
+include("interface/abstract/wrapper.jl")
 
 include("interface/automatic/interface.jl")
 include("interface/automatic/attributes.jl")

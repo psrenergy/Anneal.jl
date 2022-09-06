@@ -1,15 +1,46 @@
-# @doc raw"""
-#     Spin()
+# ~*~ MathOptInterface ~*~ #
 
-# The set ``\left\lbrace{}{-1, 1}\right\rbrace{}``.
-# """ struct Spin <: MOI.AbstractScalarSet end
+@doc raw"""
+    Spin()
 
-# function MOIU._to_string(options::MOIU._PrintOptions, ::Anneal.Spin)
-#     return string(MOIU._to_string(options, in), " {-1, 1}")
-# end
+The set ``\left\lbrace{}{-1, 1}\right\rbrace{}``.
+""" struct Spin <: MOI.AbstractScalarSet end
 
-# function MOIU._to_string(::MOIU._PrintOptions{MIME"text/latex"}, ::Anneal.Spin)
-#     return raw"\in \left\lbrace{}{-1, 1}\right\rbrace{}"
-# end
+function MOIU._to_string(options::MOIU._PrintOptions, ::Anneal.Spin)
+    return string(MOIU._to_string(options, ∈), " {-1, 1}")
+end
 
-# ~ Adding a new variable set is way harder: `_single_variable_flag` looks crazy 🤙
+function MOIU._to_string(::MOIU._PrintOptions{MIME"text/latex"}, ::Anneal.Spin)
+    return raw"\in \left\lbrace{}{-1, 1}\right\rbrace{}"
+end
+
+# ~*~ JuMP ~*~ #
+# Ref: https://jump.dev/JuMP.jl/stable/developers/extensions/#extend_variable_macro
+
+struct SpinInfo
+    info::JuMP.VariableInfo
+end
+
+function JuMP.build_variable(
+    ::Function,
+    info::JuMP.VariableInfo,
+    ::Type{Anneal.Spin};
+    kwargs...
+)
+    return Anneal.SpinInfo(info)
+end
+
+function JuMP.add_variable(
+    model::JuMP.Model,
+    info::Anneal.SpinInfo,
+    name::String,
+)
+    x = JuMP.add_variable(model, JuMP.ScalarVariable(info.info), name)
+
+    JuMP.@constraint(model, x ∈ Spin())
+
+    return x
+end
+
+JuMP.in_set_string(::MIME"text/plain", ::Anneal.Spin) = "spin"
+JuMP.in_set_string(::MIME"text/latex", ::Anneal.Spin) = raw"\in \left\langle{}-1, 1\right\rangle{}}"

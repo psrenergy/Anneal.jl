@@ -12,6 +12,12 @@ MOI.supports_constraint(
     ::Type{<:MOI.ZeroOne},
 ) = true
 
+MOI.supports_constraint(
+    ::AbstractSampler,
+    ::Type{<:MOI.VariableIndex},
+    ::Type{<:Anneal.Spin},
+) = true
+
 # ~ Objective Function Support
 MOI.supports(
     ::AbstractSampler,
@@ -20,7 +26,7 @@ MOI.supports(
 
 MOI.supports(
     ::AbstractSampler{T},
-    ::MOI.ObjectiveFunction{SQF{T}}
+    ::MOI.ObjectiveFunction{<:Union{SQF{T}, SAF{T}, VI}}
 ) where {T} = true
 
 # ~ By default, all samplers are their own raw solvers.
