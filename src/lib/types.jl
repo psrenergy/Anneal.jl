@@ -7,7 +7,7 @@ The set ``\left\lbrace{}{-1, 1}\right\rbrace{}``.
 """ struct Spin <: MOI.AbstractScalarSet end
 
 function MOIU._to_string(options::MOIU._PrintOptions, ::Anneal.Spin)
-    return string(MOIU._to_string(options, in), " {-1, 1}")
+    return string(MOIU._to_string(options, ∈), " {-1, 1}")
 end
 
 function MOIU._to_string(::MOIU._PrintOptions{MIME"text/latex"}, ::Anneal.Spin)
@@ -36,8 +36,11 @@ function JuMP.add_variable(
     name::String,
 )
     x = JuMP.add_variable(model, JuMP.ScalarVariable(info.info), name)
-    
+
     JuMP.@constraint(model, x ∈ Spin())
-    
+
     return x
 end
+
+JuMP.in_set_string(::MIME"text/plain", ::Anneal.Spin) = "spin"
+JuMP.in_set_string(::MIME"text/latex", ::Anneal.Spin) = raw"\in \left\langle{}-1, 1\right\rangle{}}"

@@ -14,17 +14,6 @@ function test_library()
     end
 end
 
-# -*- Interface -*- #
-include("interface/moi.jl")
-include("interface/jump.jl")
-
-function test_interface()
-    @testset "-*- Interface -*-" verbose = true begin
-        test_moi_interface()
-        test_jump_interface()
-    end
-end
-
 # -*- Utility Samplers -*- #
 include("samplers/exact.jl")
 include("samplers/identity.jl")
@@ -42,7 +31,6 @@ end
 function main()
     @testset "~*~ :: Anneal.jl Tests :: ~*~" verbose = true begin
         test_library()
-        test_interface()
         test_samplers()
     end
 end

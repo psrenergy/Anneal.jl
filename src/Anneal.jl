@@ -26,11 +26,15 @@ QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 # ~*~ Imports: Tests + Benchmarking ~*~ #
 import Test
 
-# -*- Includes: Anneal -*- #
+# -*- Includes: Library -*- #
 include("lib/error.jl")
 include("lib/types.jl")
 include("lib/tools.jl")
 
+# -*- Exports: Spin Variables -*- #
+export Spin
+
+# -*- Includes: Interface -*- #
 include("interface/abstract/interface.jl")
 include("interface/abstract/wrapper.jl")
 
