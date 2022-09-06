@@ -1,4 +1,4 @@
-function __test_basic_examples(optimizer::Type{<:AbstractSampler})
+function __test_basic_examples(::Type{S}) where {S<:AbstractSampler}
     n = 3
     
     # ~ QUBO Matrix
@@ -9,7 +9,7 @@ function __test_basic_examples(optimizer::Type{<:AbstractSampler})
     ↓ = 1.0
 
     Test.@testset "Basic ~ Bool ~ Min" begin
-        model = JuMP.Model(optimizer)
+        model = JuMP.Model(S)
 
         JuMP.@variable(model, x[1:n], Bin)
         JuMP.@objective(model, Min, x' * Q * x)
@@ -52,7 +52,7 @@ function __test_basic_examples(optimizer::Type{<:AbstractSampler})
     end
 
     Test.@testset "Basic ~ Bool ~ Max" begin
-        model = JuMP.Model(optimizer)
+        model = JuMP.Model(S)
 
         JuMP.@variable(model, x[1:n], Bin)
         JuMP.@objective(model, Max, x' * Q * x)
@@ -103,7 +103,7 @@ function __test_basic_examples(optimizer::Type{<:AbstractSampler})
     ↓ =  1.0
 
     Test.@testset "Basic ~ Spin ~ Min" begin
-        model = JuMP.Model(optimizer)
+        model = JuMP.Model(S)
 
         JuMP.@variable(model, s[1:n], Anneal.Spin)
         JuMP.@objective(model, Min, s' * J * s + h' * s)
@@ -146,7 +146,7 @@ function __test_basic_examples(optimizer::Type{<:AbstractSampler})
     end
 
     Test.@testset "Basic ~ Spin ~ Max" begin
-        model = JuMP.Model(optimizer)
+        model = JuMP.Model(S)
 
         JuMP.@variable(model, s[1:n], Anneal.Spin)
         JuMP.@objective(model, Max, s' * J * s + h' * s)

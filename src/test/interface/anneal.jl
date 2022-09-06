@@ -1,5 +1,5 @@
-function __test_anneal_interface(optimizer::Type{<:AbstractSampler})
+function __test_anneal_interface(::Type{S}) where {S<:AbstractSampler}
     Test.@testset "Anneal" verbose = true begin
-        Test.@test true # CI's best friend
+        Test.@test hasmethod(Anneal.sample, (S,))
     end
 end
