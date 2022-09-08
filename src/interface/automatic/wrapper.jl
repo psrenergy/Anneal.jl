@@ -29,7 +29,7 @@ function MOI.optimize!(sampler::AutomaticSampler, model::MOI.ModelLike)
 end
 
 function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {T}
-    sampler.model = build_qubo_model(T, model)::QUBOTools.StandardQUBOModel
+    sampler.model = Anneal.parse_qubo_model(T, model)::QUBOTools.StandardQUBOModel
 
     return MOIU.identity_index_map(model)
 end
