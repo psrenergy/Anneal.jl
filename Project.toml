@@ -1,7 +1,7 @@
 name = "Anneal"
 uuid = "e4d9eb7f-b088-426e-aeb5-1c0dae3d8abb"
 authors = ["pedromxavier <pedroxavier@psr-inc.com>", "joaquimg <joaquim@psr-inc.com>", "AndradeTiago <tiago.andrade@psr-inc.com>", "David Bernal <dbernalneira@usra.edu>"]
-version = "0.4.1"
+version = "0.4.2"
 
 [deps]
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
