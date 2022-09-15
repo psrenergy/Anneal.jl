@@ -37,7 +37,7 @@ where $Q \in \mathbb{R}^{n \times n}$ is a symmetric matrix. Maximization is aut
 
 ### Installation
 ```julia
-pkg> add Anneal
+julia> ]add Anneal
 ```
 or
 ```julia
@@ -51,11 +51,13 @@ using Anneal
 
 model = Model(ExactSampler.Optimizer)
 
-Q = [ 1.0  2.0 -3.0
-      2.0 -1.5 -2.0
-     -3.0 -2.0  0.5 ]
+Q = [
+    -1.0  2.0  2.0
+     2.0 -1.0  2.0
+     2.0  2.0 -1.0
+]
 
-@variable(model, x[i = 1:3], Bin)
+@variable(model, x[1:3], Bin)
 @objective(model, Min, x' * Q * x)
 
 optimize!(model)

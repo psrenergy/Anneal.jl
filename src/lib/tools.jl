@@ -1,6 +1,6 @@
 @doc raw"""
-    build_qubo_model(model::MOI.ModelLike)
-    build_qubo_model(T::Type, model::MOI.ModelLike)
+    parse_qubo_model(model::MOI.ModelLike)
+    parse_qubo_model(T::Type, model::MOI.ModelLike)
 
 If the given model is ready to be interpreted as a QUBO model, then returns the corresponding `QUBOTools.StandardQUBOModel`.
 
@@ -9,10 +9,10 @@ A few conditions must be met:
     2. No other constraints are allowed
     3. The objective function must be of type `MOI.ScalarQuadraticFunction`, `MOI.ScalarAffineFunction` or `MOI.VariableIndex`
     4. The objective sense must be either `MOI.MIN_SENSE` or `MOI.MAX_SENSE`
-""" function build_qubo_model end
+""" function parse_qubo_model end
 
-function build_qubo_model(model::MOI.ModelLike)
-    return build_qubo_model(Float64, model)
+function parse_qubo_model(model::MOI.ModelLike)
+    return parse_qubo_model(Float64, model)
 end
 
 function __is_quadratic(model::MOI.ModelLike)
@@ -136,7 +136,7 @@ function __extract_qubo_model(::Type{T}, Ω::Set{VI}, model::MOI.ModelLike, ::QU
 end
 
 
-function build_qubo_model(T::Type, model::MOI.ModelLike)
+function parse_qubo_model(T::Type, model::MOI.ModelLike)
     # ~*~ Check for emptiness ~*~ #
     if MOI.is_empty(model)
         @warn "The given model is empty"
@@ -168,7 +168,7 @@ function build_qubo_model(T::Type, model::MOI.ModelLike)
     )
     𝕊 = Set{VI}(
         MOI.get(model, MOI.ConstraintFunction(), cᵢ)
-        for cᵢ in MOI.get(model, MOI.ListOfConstraintIndices{VI,Spin}())
+        for cᵢ in MOI.get(model, MOI.ListOfConstraintIndices{VI,Anneal.Spin}())
     )
 
     # ~*~ Retrieve Variable Domain ~*~ #

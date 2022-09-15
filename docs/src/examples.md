@@ -1,24 +1,26 @@
 # Examples
 
-## Simple QUBO
-```@example simple-qubo
+## Simple QUBO with an [`ExactSampler`](@ref exact-sampler)
+```@example
 using JuMP
 using Anneal
 
-model = Model(SimulatedAnnealer.Optimizer)
+model = Model(ExactSampler.Optimizer)
 
-Q = [ 1.0  2.0 -3.0
-      2.0 -1.5 -2.0
-     -3.0 -2.0  0.5 ]
+Q = [
+    -1.0  2.0  2.0
+     2.0 -1.0  2.0
+     2.0  2.0 -1.0
+]
 
-@variable(model, x[i = 1:3], Bin)
+@variable(model, x[1:3], Bin)
 @objective(model, Min, x' * Q * x)
 
 optimize!(model)
 
 for i = 1:result_count(model)
-      xi = value.(x; result = i)
-      yi = objective_value(model; result = i)
-      println("f($xi) = $yi")
+    xᵢ = value.(x; result=i)
+    yᵢ = objective_value(model; result=i)
+    println("f($xᵢ) = $yᵢ")
 end
 ```

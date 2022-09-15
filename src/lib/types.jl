@@ -37,7 +37,7 @@ function JuMP.add_variable(
 )
     x = JuMP.add_variable(model, JuMP.ScalarVariable(info.info), name)
 
-    JuMP.@constraint(model, x ∈ Spin())
+    JuMP.@constraint(model, x ∈ Anneal.Spin())
 
     return x
 end
