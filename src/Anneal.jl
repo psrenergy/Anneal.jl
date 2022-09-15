@@ -19,6 +19,10 @@ export MOI
 import QUBOTools: QUBOTools, SampleSet, Sample, backend
 import QUBOTools: ising, qubo, energy, adjacency
 
+# ~*~ Expots: QUBOTools Backend ~*~ #
+export QUBOTools, SampleSet, Sample, backend
+export ising, qubo, energy, adjacency
+
 # ~*~ See:
 # https://github.com/jump-dev/MathOptInterface.jl/issues/1985
 QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
