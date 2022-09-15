@@ -67,14 +67,27 @@ for i = 1:result_count(model)
 end
 ```
 
-### Samplers
+### Utility Samplers
+| Module Name       | Descripition                                 | Package                                             |
+| :------ | :----------- | :-------- |
+| `ExactSampler`    | Sequentially samples all possible states by exaustive enumeration. Finds the global optimum but can't be used for models with much more than 20 variables. | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |
+| `IdentitySampler` | Samples the exact same state defined as warm start.                                                                                                        | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |
+| `RandomSampler`   | Randomly samples states by regular or biased coin tossing. It is commonly used to compare new solving methods to a _random guessing_ baseline.             | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |
 
-| Module Name       | Descripition                                                                                                                                               | Package                                             | Status |
-| :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :----: |
-| `DWaveNeal`       | D-Wave's open-source Simulated Annealing sampler. | [DWaveNeal.jl](https://github.com/psrenergy/DWaveNeal.jl) | ✔️ |
-| `ExactSampler`    | Sequentially samples all possible states by exaustive enumeration. Finds the global optimum but can't be used for models with much more than 20 variables. | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
-| `IdentitySampler` | Samples the exact same state defined as warm start.                                                                                                        | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
-| `RandomSampler`   | Randomly samples states by regular or biased coin tossing. It is commonly used to compare new solving methods to a _random guessing_ baseline.             | [Anneal.jl](https://github.com/psrenergy/Anneal.jl) |   ✔️    |
+### Interfaces
+| Module Name                 | Descripition                                                                                                                                               | Package                                             |
+| :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
+| `DWaveNeal`                 | Wrapper for D-Wave's open-source Simulated Annealing sampler. | [DWaveNeal.jl](https://github.com/psrenergy/DWaveNeal.jl) |
+| `QuantumAnnealingInterface` | Wrapper for LANL's Quantum Annealing simulator | [QuantumAnnealingInterface.jl](https://github.com/psrenergy/QuantumAnnealingInterface.jl) |
+
+### Heuristics
+| Module Name       | Descripition                                                                                                                                               | Package                                             |
+| :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
+| `GreedyDescent` | Stochastic greedy descent algorithm. | [IsingSolvers.jl](https://github.com/psrenergy/IsingSolvers.jl) |
+| `ILP`       | Integer Linear Programming apporach using a regular MIP solver chosen by the user. | [IsingSolvers.jl](https://github.com/psrenergy/IsingSolvers.jl) |
+| `MCMCRandom` | Monte Carlo Markov Chain Random sampler |  [IsingSolvers.jl](https://github.com/psrenergy/IsingSolvers.jl) |
+
+
 
 If you implemented your own sampler interface using [Anneal.jl](https://github.com/psrenergy/Anneal.jl), consider opening an [issue](https://github.com/psrenergy/Anneal.jl/issues) or submiting a [pull request](https://github.com/psrenergy/Anneal.jl/pulls) to add it to the list.
 
@@ -84,23 +97,36 @@ There are two options to consider when using [Anneal.jl](https://github.com/psre
 As the diagram below indicates, the _automatic_ type is a subtype of the general, abstract one.
 
 ```mermaid
-flowchart TD;
-    OPTIMIZER["<code>MOI.AbstractOptimizer</code>"];
-    ABSTRACT["<code>AbstractSampler{T}</code>"];
-    AUTOMATIC["<code>AutomaticSampler{T}</code>"];
+flowchart TB;
+    OPTIMIZER(["<code>MOI.AbstractOptimizer</code>"]);
+    ABSTRACT(["<code>AbstractSampler{T}</code>"]);
+    AUTOMATIC(["<code>AutomaticSampler{T}</code>"]);
+    
+    OPTIMIZER --> ABSTRACT --> AUTOMATIC;
 
-    EXACT(["<code>ExactSampler.Optimizer{T}</code>"]);
-    IDENTITY(["<code>IdentiySampler.Optimizer{T}</code>"]);
-    RANDOM(["<code>RandomSampler.Optimizer{T}</code>"]);
-    DWAVENEAL(["<code>DWaveNeal.Optimizer{T}</code>"]);
-
-    OPTIMIZER --> ABSTRACT;
-    ABSTRACT  --> AUTOMATIC;
-
-    AUTOMATIC --> EXACT;
-    AUTOMATIC --> IDENTITY;
-    AUTOMATIC --> RANDOM;
-    AUTOMATIC ---> DWAVENEAL;
+    subgraph UTILITY [Utility]
+        direction LR
+        EXACT["<code>ExactSampler.Optimizer{T}</code>"];
+        IDENTITY["<code>IdentiySampler.Optimizer{T}</code>"];
+        RANDOM["<code>RandomSampler.Optimizer{T}</code>"];
+    end
+    
+    subgraph HEURISTICS [Heuristics]
+        direction LR
+        GREEDY["<code>IsingSolvers.GreedyDescent.Optimizer{T}</code>"];
+        ILP["<code>IsingSolvers.ILP.Optimizer{T}</code>"];
+        MCMC["<code>IsingSolvers.MCMCRandom.Optimizer{T}</code>"];
+    end
+    
+    subgraph INTERFACES [Interfaces]
+        direction LR
+        DWAVENEAL["<code>DWaveNeal.Optimizer{T}</code>"];
+        QUANTUMANNEALING["<code>QuantumAnnealingInterface.Optimizer{T}</code>"];
+    end
+       
+    AUTOMATIC --> UTILITY;
+    AUTOMATIC --> INTERFACES;
+    AUTOMATIC --> HEURISTICS;
 ```
 
 #### Automatic Interface
