@@ -1,10 +1,10 @@
 # Anneal.jl's Assets
 
-## Logo
+## [Logo](@id logo)
 
-[Anneal](/)'s logo aims to illustrate the annealing process with a progressive addition of the energy landscape.
+Anneal.jl's logo aims to illustrate the annealing process with a progressive addition of the energy landscape.
 
-[![Anneal.jl](logo.svg)](/docs/src/assets)
+[![Anneal.jl](logo.svg)](@ref logo)
 
 ## Colors
 

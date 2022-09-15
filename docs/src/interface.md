@@ -4,7 +4,7 @@ This guide aims to provide be a Tutorial on how to implement new sampler interfa
 There are basically three paths to follow, each one depending on the desired level of control over the wrapper's behaviour.
 
 ## The `@anew` macro
-Using the [`Anneal.@anew`](@ref) macro is the most straightforward way to get your sampler running right now.
+Using the [`Anneal.@anew`](@ref anew-macro) macro is the most straightforward way to get your sampler running right now.
 Apart from the macro call it is needed to implement the [`Anneal.sample`](@ref) method.
 
 ### I. Imports
@@ -18,6 +18,7 @@ const MOI = MathOptInterface
 ### II. `@anew`
 This macro takes two arguments: the identifier of the sampler's `struct`, and a `begin...end` block containing configuration parameters as *key-value* pairs.
 If ommited, the first defaults to `Optimizer`, following regular `MOI` conventions.
+In order to work smoothly, this approach leverages the [`QUBOTools`](https://github.com/psrenergy/QUBOTools.jl) backend.
 
 
 ```julia
@@ -36,7 +37,7 @@ end
 ```julia
 function Anneal.sample(sampler::Optimizer{T}) where T
     # ~ Retrieve Problem in Array form ~
-    x, s, Q, c = Anneal.qubo(Array, sampler)
+    Q, α, β = Anneal.qubo(Array, sampler)
 
     # ~ Retrieve Attributes ~ #
     num_reads = MOI.get(sample, NumberOfReads())
@@ -45,10 +46,10 @@ function Anneal.sample(sampler::Optimizer{T}) where T
     super_attr = MOI.get(sample, SuperAttribute())
     @assert super_attr ∈ ("super", "ultra", "mega")    
 
-    # ~*~ Call Super Sampler ~*~ #
-    t0 = time()
+    time_data = Dict{String, Any}()
 
-    samples = ccall(
+    # ~*~ Call Super Sampler ~*~ #
+    results = @timed ccall(
         :super_sample,
         Vector{Int},
         (
@@ -61,42 +62,21 @@ function Anneal.sample(sampler::Optimizer{T}) where T
         super_attr,
     )
 
+    samples = results.value
+
     t1 = time()
 
     # ~ Write Solution Metadata ~ #
     metadata = Dict{String, Any}(
-        "solver" => "Super Sampler (C++)",
-        "time" => Dict{String, Any}(
-            "total" => (t1 - t0),
-        )
+        "time"   => time_data,
+        "origin" => "Super C Sampler",
     )
 
     # ~ Return Sample Set ~
     return Anneal.SampleSet{Int, T}(samples, sampler, metadata)
 end
 ```
-
-Types are guaranteed to be consistent. In the other hand, values must undergo assertion
-
-
-We expect that most users will be happy with this approach and it is likely that it will be improved very often.
-
-### The [`QUBOTools`](https://github.com/psrenergy/QUBOTools.jl) backend
-
-If you want to dive deeper into
-
-```julia
-import Anneal
-import QUBOTools
-
-const QUBOTools_BACKEND{T} = QUBOTools.StandardQUBOModel{VI, Int, T, QUBOTools.BoolDomain}
-
-mutable struct Optimizer{T} <: Anneal.Sampler{T}
-    backend::QUBOTools_BACKEND{T}
-end
-
-QUBOTools.backend(sampler::Optimizer) = sampler.backend
-```
+We expect that most users will be happy with this approach and it is likely that it will be improved and receive support very often.
 
 ## MathOptInterface API Coverage
 This Document is intended to help keeping track of which MOI API Methods and Properties have been implemented for a new solver or model interface.

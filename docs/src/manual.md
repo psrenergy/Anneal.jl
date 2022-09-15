@@ -1,43 +1,39 @@
 # Manual
 
 ## Introduction
-The core idea behind this package is to provide a toolbox for developing and integrating QUBO annealing/sampling tools with the [JuMP](https://jump.dev) mathematical programming environment.
+The core idea behind this package is to provide a toolbox for developing and integrating [QUBO](https://en.wikipedia.org/wiki/Quadratic_unconstrained_binary_optimization) sampling tools with the [JuMP](https://jump.dev) mathematical programming environment.
 Appart from the few couple exported utility engines, Anneal.jl is inherently about extensions, which is achieved by implementing most of the [MOI](https://jump.dev/MathOptInterface.jl) requirements, leaving only the essential for the developer.
-
-The annealers and samplers defined via the `AbstractSampler{T}` interface only support models given in a QUBO form, as explained below.
 
 ### QUBO
 An optimization problem is in its QUBO form if it is written as
+
 ```math
 \begin{array}{rl}
-    \min & \mathbf{x}^{\intercal} \mathbf{Q}\, \mathbf{x} + c \\
-    \text{s.t.} & \mathbf{x} \in \mathbb{B}^{n}
+           \min & \alpha \left[ \mathbf{x}'\mathbf{Q}\,\mathbf{x} + \mathbf{\ell}'\mathbf{x} + \beta \right] \\
+    \text{s.t.} & \mathbf{x} \in S \cong \mathbb{B}^{n}
 \end{array}
 ```
-where ``\mathbf{Q} \in \mathbb{R}^{n}`` is a symmetric matrix and ``c \in \mathbb{R}`` the constant offset.
+with linear terms ``\mathbf{\ell} \in \mathbb{R}^{n}`` and quadratic ``\mathbf{Q} \in \mathbb{R}^{n \times n}``. ``\alpha, \beta \in \mathbb{R}`` are, respectively, the scaling and offset factors.
 
-In terms of Julia's data structures, we define a *QUBO Normal Form* (NQF) with a triplet
-```julia
-(x::Dict{VI, Union{Int, Nothing}}, Q::Dict{Tuple{Int, Int}, T}, c::T)
-```
-where ``x`` provides a mapping between each MathOptInterface's `VariableIndex` and the corresponding integer index in `Q`.
+The MOI-JuMP optimizers defined using the `Anneal.AbstractSampler{T} <: MOI.AbstractOptimizer` interface only support models given in the QUBO form.
+[Anneal.jl](https://github.com) employs [QUBOTools]
 
-Even though only QUBO formulations are supported as input, Anneal provides internal tools for working with Ising Model instances since many samplers rely on it.
-Model validation and trivial QUBO/Insing conversion is made using the functions below.
 ```@docs
-Anneal.isqubo
 Anneal.qubo
 Anneal.ising
 ```
 
 ## Defining a new sampler interface
 
-The `Anneal.@anew` macro is available to speed up the interface setup process.
+### The [`@anew`](@id anew-macro) macro
+`Anneal.@anew` is available to speed up the interface setup process.
+
 ```@docs
 Anneal.@anew
 ```
 
-Inside a module scope for the new interface, one should call the `Anneal.@anew` macro, specifying the solver's attributes as described in the macro's docs. One must also define `MOI.get` methods for the `MOI.SolverName`, `MOI.RawSolver` and `MOI.SolverVersion` attributes. The last and most important step is to define the `Anneal.sample` method, which returns both a vector with every sample and also the sampling time. The whole standard definition is described in the next example.
+Inside a module scope for the new interface, one should call the [`Anneal.@anew`](@ref anew-macro) macro, specifying the solver's attributes as described in the macro's docs.
+The second and last step is to define the `Anneal.sample(::Optimizer)` method, that must return a [`Anneal.SampleSet`](@ref sampleset).
 
 ```julia
 module SuperAnnealer
