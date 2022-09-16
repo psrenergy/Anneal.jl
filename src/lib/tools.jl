@@ -35,7 +35,12 @@ function __is_optimization(model::MOI.ModelLike)
     return (S === MOI.MAX_SENSE || S === MOI.MIN_SENSE)
 end
 
-function __extract_qubo_model(::Type{T}, Ω::Set{VI}, model::MOI.ModelLike, ::QUBOTools.BoolDomain) where {T}
+function __extract_qubo_model(
+    ::Type{T},
+    Ω::Set{VI},
+    model::MOI.ModelLike,
+    ::QUBOTools.BoolDomain,
+) where {T}
     L = Dict{VI,T}(xᵢ => zero(T) for xᵢ ∈ Ω)
     Q = Dict{Tuple{VI,VI},T}()
 
@@ -85,7 +90,12 @@ function __extract_qubo_model(::Type{T}, Ω::Set{VI}, model::MOI.ModelLike, ::QU
     return (L, Q, offset)
 end
 
-function __extract_qubo_model(::Type{T}, Ω::Set{VI}, model::MOI.ModelLike, ::QUBOTools.SpinDomain) where {T}
+function __extract_qubo_model(
+    ::Type{T},
+    Ω::Set{VI},
+    model::MOI.ModelLike,
+    ::QUBOTools.SpinDomain,
+) where {T}
     L = Dict{VI,T}(xᵢ => zero(T) for xᵢ ∈ Ω)
     Q = Dict{Tuple{VI,VI},T}()
 
@@ -163,13 +173,17 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
 
     Ω = Set{VI}(MOI.get(model, MOI.ListOfVariableIndices()))
     𝔹 = Set{VI}(
-        MOI.get(model, MOI.ConstraintFunction(), cᵢ)
-        for cᵢ in MOI.get(model, MOI.ListOfConstraintIndices{VI,MOI.ZeroOne}())
+        MOI.get(model, MOI.ConstraintFunction(), cᵢ) for
+        cᵢ in MOI.get(model, MOI.ListOfConstraintIndices{VI,MOI.ZeroOne}())
     )
-    𝕊 = Set{VI}(
-        MOI.get(model, MOI.ConstraintFunction(), cᵢ)
-        for cᵢ in MOI.get(model, MOI.ListOfConstraintIndices{VI,Anneal.Spin}())
-    )
+    𝕊 = if MOI.supports_constraint(model, VI, Anneal.Spin)
+        Set{VI}(
+            MOI.get(model, MOI.ConstraintFunction(), cᵢ) for
+            cᵢ in MOI.get(model, MOI.ListOfConstraintIndices{VI,Anneal.Spin}())
+        )
+    else # Models aren't obligated to support `Spin`!
+        Set{VI}() # empty set
+    end
 
     # ~*~ Retrieve Variable Domain ~*~ #
     # Assuming:
@@ -212,7 +226,7 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     sense = MOI.get(model, MOI.ObjectiveSense())
 
     scale = one(T) # ~ Assuming MIN_SENSE
-    
+
     # ~*~ Invert Problem Sense ~*~ #
     if sense === MOI.MAX_SENSE
         L = Dict{VI,T}(i => -l for (i, l) in L)
@@ -222,10 +236,5 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     end
 
     # ~*~ Return Model ~*~ #
-    return QUBOTools.StandardQUBOModel{VI,Int,T,D}(
-        L,
-        Q;
-        scale=scale,
-        offset=offset
-    )
+    return QUBOTools.StandardQUBOModel{VI,Int,T,D}(L, Q; scale = scale, offset = offset)
 end
