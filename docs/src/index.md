@@ -7,13 +7,13 @@ It also contains a few utility samplers and testing tools for performance compar
 ## Quick Start
 
 ### Installation
-[Anneal.jl]
+[Anneal.jl](https://github.com/psrenergy/Anneal.jl) is registered in Julia's General Registry and is available for download using the standard package manager.
 
 ```julia-repl
 julia> ]add Anneal
 ```
 or
-```julia
+```julia-repl
 julia> import Pkg; Pkg.add("Anneal")
 ``` 
 
@@ -56,7 +56,3 @@ end
   url          = {https://doi.org/10.5281/zenodo.6390515}
 }
 ```
-
-[ToQUBO.jl]: [ToQUBO.jl](https://github.com/psrenergy/ToQUBO.jl)
-[Anneal.jl]: [Anneal.jl](https://github.com/psrenergy/Anneal.jl)
-[QUBOTools.jl]: [QUBOTools.jl](https://github.com/psrenergy/QUBOTools.jl)
