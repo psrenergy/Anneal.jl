@@ -47,35 +47,49 @@ The second and last step is to define the `Anneal.sample(::Optimizer)` method, t
 module SuperAnnealer
     using Anneal
 
+    # This will define Optimizer{T} <: MOI.AbstractOptimizer
     Anneal.@anew begin
-        NumberOfReads::Integer = 100
-        SuperAttribute::Any = nothing
-    end # This will define Optimizer{T} <: MOI.AbstractOptimizer
-
-    # -*- MathOptInterface -*-
-    function MOI.get(::Optimizer, MOI.SolverName)
-        "Super Annealer"
+        name = "Super Sampler"
+        sense = :max
+        domain = :spin
+        version = v"1.0.2"
+        attributes = begin
+            SuperAttribute::Any = nothing
+            NumberOfReads("num_reads")::Integer = 1_000
+        end
     end
 
     function Anneal.sample(sampler::Optimizer{T}) where {T}
         # ~ Is your annealer running on the Ising Model? Have this:
         h, J = Anneal.ising(
             Dict, # Here we opt for a sparse, dictionary representation 
-            T,    # The type for coefficients
+            T,    # The coefficient type
             sampler
         )
 
-        n    = MOI.get(sampler, NumberOfReads())
-        attr = MOI.get(sampler, SuperAttribute())
+        # ~ Retrieve Attributes ~ #
+        num_reads = MOI.get(sample, NumberOfReads())
+        @assert num_reads > 0
 
-        result = @timed Vector{Int}[super_sample(h, J; attr=attr) for i = 1:n]
+        super_attr = MOI.get(sample, SuperAttribute())
+        @assert super_attr ∈ ("super", "ultra", "mega")    
+
+        # ~*~ Timing Information ~*~ #
+        time_data = Dict{String,Any}()
+
+        # ~*~ Run Algorithm ~*~ #
+        result = @timed Vector{Int}[
+            super_sample(h, J; attr=super_attr)
+            for _ = 1:num_reads
+        ]
         states = result.value
 
+        # ~*~ Record Time ~*~ #
+        time_data["effective"] = result.time
+
         metadata = Dict{String,Any}(
-            "time" => Dict{String,Any}(
-                "sampling" => result.time
-            ),
-            "origin" => "Super sampling method"
+            "time"   => time_data,
+            "origin" => "Super Sampling method"
         )
 
         # ~ Here some magic happens:
@@ -87,10 +101,19 @@ module SuperAnnealer
         return Anneal.SampleSet{Int,T}(sampler, states, metadata)
     end
 
-    function super_sample(h, J; kws...)
-        ... # your own magic here!
+    function super_sample(h, J; super_attr, kws...)
+        ccall(
+        :super_sample,
+        Vector{Int},
+        (
+            Ptr{Cdouble},
+            Cint,
+            Cstring,
+        ),
+        h,
+        J,
+        super_attr,
+    )
     end
 end
 ```
-
-Type assertion for `Anneal.sample`'s return can be done using the `::Tuple{Anneal.SamplerResults, Float64}` query.
