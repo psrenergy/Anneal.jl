@@ -1,6 +1,6 @@
 # A new Sampler
 
-This guide aims to provide be a Tutorial on how to implement new sampler interfaces using [Anneal.jl](https://github.com/psrenergy/Anneal.jl).
+This guide aims to provide a tutorial on how to implement new sampler interfaces using [Anneal.jl](https://github.com/psrenergy/Anneal.jl).
 There are basically three paths to follow, each one depending on the desired level of control over the wrapper's behaviour.
 
 ## The `@anew` macro

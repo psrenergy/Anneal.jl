@@ -17,6 +17,12 @@ or
 julia> import Pkg; Pkg.add("Anneal")
 ``` 
 
+You might also be interested in the lateste development version:
+
+```julia-repl
+julia> ]add Anneal#master
+```
+
 ### Example
 ```@example
 using JuMP
@@ -43,7 +49,6 @@ end
 ```
 
 ## Citing Anneal.jl
-
 ```tex
 @software{anneal.jl:2022,
   author = {Pedro Xavier and Tiago Andrade and Joaquim Garcia and David Bernal},
