@@ -44,7 +44,8 @@ optimize!(model)
 for i = 1:result_count(model)
     xᵢ = value.(x; result=i)
     yᵢ = objective_value(model; result=i)
-    println("f($xᵢ) = $yᵢ")
+    rᵢ = reads(model; result=i)
+    println("f($xᵢ) = $yᵢ ($rᵢ)")
 end
 ```
 
