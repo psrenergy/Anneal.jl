@@ -182,8 +182,8 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.NumberOfVariables)
     return QUBOTools.domain_size(sampler)
 end
 
-# ~*~ :: I/O :: ~*~ #
-function Base.write(filename::String, sampler::AutomaticSampler)
+# ~*~ File IO: Base API ~*~ #
+function Base.write(filename::AbstractString, sampler::AutomaticSampler)
     return write(
         filename,
         convert(
@@ -193,11 +193,22 @@ function Base.write(filename::String, sampler::AutomaticSampler)
     )
 end
 
-function Base.read!(filename::String, sampler::AutomaticSampler)
+function Base.read!(filename::AbstractString, sampler::AutomaticSampler)
     source = read(filename, QUBOTools.infer_model_type(filename))
     target = QUBOTools.backend(sampler)::QUBOTools.StandardQUBOModel
 
     copy!(target, source)
 
-    nothing
+    return nothing
+end
+
+# ~*~ File IO: MOI API ~*~ #
+function MOI.read_from_file(sampler::AutomaticSampler, filename::AbstractString)
+    read!(filename, sampler)
+
+    return nothing
+end
+
+function MOI.write_to_file(sampler::AutomaticSampler, filename::AbstractString)
+    return write(filename, sampler)
 end
