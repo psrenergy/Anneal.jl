@@ -143,6 +143,6 @@ flowchart TB;
         <img width="200px" src="https://raw.githubusercontent.com/psrenergy/Anneal.jl/master/docs/src/assets/logo.svg" alt="Anneal.jl" />
     </a>
     <a href="https://github.com/psrenergy/QUBOTools.jl">
-        <img width="200px" src="https://raw.githubusercontent.com/psrenergy/QUBOTools.jl/master/docs/src/assets/logo.svg" alt="QUBOTools.jl" />
+        <img width="200px" src="https://raw.githubusercontent.com/psrenergy/QUBOTools.jl/main/docs/src/assets/logo.svg" alt="QUBOTools.jl" />
     </a>
 </div>
