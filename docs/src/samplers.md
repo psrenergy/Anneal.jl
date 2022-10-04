@@ -1,5 +1,10 @@
 # Samplers
 
+## [Abstract Sampler](@id abstract-sampler)
+```@docs
+Anneal.AbstractSampler
+```
+
 ## [Identity Sampler](@id identity-sampler)
 
 ```@docs

@@ -17,7 +17,12 @@ makedocs(;
     ),
     sitename = "Anneal.jl",
     authors = "Pedro Xavier and Tiago Andrade and Joaquim Garcia and David Bernal",
-    pages = ["Home" => "index.md", "Manual" => "manual.md", "Examples" => "examples.md"],
+    pages = [
+        "Home" => "index.md",
+        "Manual" => "manual.md",
+        "Examples" => "examples.md",
+        "Samplers" => "samplers.md",
+    ],
     workdir = @__DIR__,
 )
 

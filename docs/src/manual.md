@@ -33,22 +33,22 @@ Below, there are links to the files where the actual interfaces are implemented,
 |                                                                                           | [MCMCRandom](https://github.com/psrenergy/IsingSolvers.jl/blob/main/src/solvers/mcmc_random.jl)                                   |
 | [QuantumAnnealingInterface.jl](https://github.com/psrenergy/QuantumAnnealingInterface.jl) | [QuantumAnnealingInterface](https://github.com/psrenergy/QuantumAnnealingInterface.jl/blob/main/src/QuantumAnnealingInterface.jl) |
 
-### The [`@anew`](@id anew-macro) macro
+### The [`@anew`](@id anew) macro
 `Anneal.@anew` is available to speed up the interface setup process.
 
 ```@docs
 Anneal.@anew
 ```
 
-Inside a module scope for the new interface, one should call the [`Anneal.@anew`](@ref anew-macro) macro, specifying the solver's attributes as described in the macro's docs.
+Inside a module scope for the new interface, one should call the [`Anneal.@anew`](@ref anew) macro, specifying the solver's attributes as described in the macro's docs.
 The second and last step is to define the `Anneal.sample(::Optimizer)` method, that must return a [`Anneal.SampleSet`](@ref sampleset).
 
-```julia
+```@example interface
 module SuperAnnealer
     using Anneal
 
     # This will define Optimizer{T} <: MOI.AbstractOptimizer
-    Anneal.@anew begin
+    Anneal.@anew Optimizer begin
         name = "Super Sampler"
         sense = :max
         domain = :spin
@@ -59,19 +59,27 @@ module SuperAnnealer
         end
     end
 
+    model = Model(SuperSampler.Optimizer)
+
+    @variable(model, x[1:n], Bin)
+    @objective(model, Min, x' * Q * x)
+
     function Anneal.sample(sampler::Optimizer{T}) where {T}
         # ~ Is your annealer running on the Ising Model? Have this:
         h, J = Anneal.ising(
-            Dict, # Here we opt for a sparse, dictionary representation 
-            T,    # The coefficient type
+            Matrix, # Here we opt for a dense, matrix representation 
+            T,      # The coefficient type
             sampler
         )
 
+
+        n = MOI.get(sampler, MOI.NumberOfVariables())
+
         # ~ Retrieve Attributes ~ #
-        num_reads = MOI.get(sample, NumberOfReads())
+        num_reads = MOI.get(sampler, NumberOfReads())
         @assert num_reads > 0
 
-        super_attr = MOI.get(sample, SuperAttribute())
+        super_attr = MOI.get(sampler, SuperAttribute())
         @assert super_attr ∈ ("super", "ultra", "mega")    
 
         # ~*~ Timing Information ~*~ #
@@ -79,7 +87,7 @@ module SuperAnnealer
 
         # ~*~ Run Algorithm ~*~ #
         result = @timed Vector{Int}[
-            super_sample(h, J; attr=super_attr)
+            super_sample(n, h, J; attr=super_attr)
             for _ = 1:num_reads
         ]
         states = result.value
@@ -101,19 +109,53 @@ module SuperAnnealer
         return Anneal.SampleSet{Int,T}(sampler, states, metadata)
     end
 
-    function super_sample(h, J; super_attr, kws...)
-        ccall(
-        :super_sample,
-        Vector{Int},
-        (
-            Ptr{Cdouble},
-            Cint,
-            Cstring,
-        ),
-        h,
-        J,
-        super_attr,
-    )
+    function super_sample(n, h, J; super_attr, kws...)
+        @ccall(
+            :super_sample,
+            Vector{Int},
+            (
+                Cint,
+                Ptr{Cdouble},
+                Ptr{Cdouble},
+                Cstring,
+            ),
+            n,
+            h,
+            J,
+            super_attr,
+        )
     end
 end
+```
+
+## The [`sample`](@id sample) function
+```@docs    
+Anneal.sample
+Anneal.sample!
+```
+
+## Solution Translation
+```@docs
+Anneal.model_domain
+Anneal.solver_domain
+Anneal.model_sense
+Anneal.solver_sense
+```
+
+## Model I/O
+
+### From JuMP / MOI
+
+### From file
+
+## Tests & Benchmarking
+
+### Automatic Tests
+```@docs
+Anneal.test
+```
+
+### Automatic Benchmarking
+```@docs    
+Anneal.benchmark
 ```

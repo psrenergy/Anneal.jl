@@ -17,7 +17,7 @@ or
 julia> import Pkg; Pkg.add("Anneal")
 ``` 
 
-You might also be interested in the lateste development version:
+You might also be interested in the latest development version:
 
 ```julia-repl
 julia> ]add Anneal#master
@@ -44,7 +44,9 @@ optimize!(model)
 for i = 1:result_count(model)
     xᵢ = value.(x; result=i)
     yᵢ = objective_value(model; result=i)
-    println("f($xᵢ) = $yᵢ")
+    rᵢ = reads.(model; result=i)
+
+    println("f($(xᵢ...)) = $(yᵢ)\t×$(rᵢ)")
 end
 ```
 
