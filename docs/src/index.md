@@ -44,9 +44,14 @@ optimize!(model)
 for i = 1:result_count(model)
     xᵢ = value.(x; result=i)
     yᵢ = objective_value(model; result=i)
+<<<<<<< HEAD
     rᵢ = reads.(model; result=i)
 
     println("f($(xᵢ...)) = $(yᵢ)\t×$(rᵢ)")
+=======
+    rᵢ = reads(model; result=i)
+    println("f($xᵢ) = $yᵢ ($rᵢ)")
+>>>>>>> 9a7b6a1cedf212782ffc1ef23934e9607c282ffc
 end
 ```
 
