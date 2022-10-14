@@ -1,6 +1,6 @@
 # Examples
 
-## Simple QUBO with an [`ExactSampler`](@ref exact-sampler)
+## Solving Simple QUBO Model with Anneal's [`ExactSampler`](@ref exact-sampler)
 ```@example
 using JuMP
 using Anneal

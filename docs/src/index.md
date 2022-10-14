@@ -7,15 +7,21 @@ It also contains a few utility samplers and testing tools for performance compar
 ## Quick Start
 
 ### Installation
-[Anneal.jl]
+[Anneal.jl](https://github.com/psrenergy/Anneal.jl) is registered in Julia's General Registry and is available for download using the standard package manager.
 
 ```julia-repl
 julia> ]add Anneal
 ```
 or
-```julia
+```julia-repl
 julia> import Pkg; Pkg.add("Anneal")
 ``` 
+
+You might also be interested in the latest development version:
+
+```julia-repl
+julia> ]add Anneal#master
+```
 
 ### Example
 ```@example
@@ -38,12 +44,12 @@ optimize!(model)
 for i = 1:result_count(model)
     xᵢ = value.(x; result=i)
     yᵢ = objective_value(model; result=i)
-    println("f($xᵢ) = $yᵢ")
+    rᵢ = reads(model; result=i)
+    println("f($xᵢ) = $yᵢ ($rᵢ)")
 end
 ```
 
 ## Citing Anneal.jl
-
 ```tex
 @software{anneal.jl:2022,
   author = {Pedro Xavier and Tiago Andrade and Joaquim Garcia and David Bernal},
@@ -56,7 +62,3 @@ end
   url          = {https://doi.org/10.5281/zenodo.6390515}
 }
 ```
-
-[ToQUBO.jl]: [ToQUBO.jl](https://github.com/psrenergy/ToQUBO.jl)
-[Anneal.jl]: [Anneal.jl](https://github.com/psrenergy/Anneal.jl)
-[QUBOTools.jl]: [QUBOTools.jl](https://github.com/psrenergy/QUBOTools.jl)

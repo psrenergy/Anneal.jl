@@ -1,7 +1,6 @@
 # A new Sampler
+This guide aims to provide a tutorial on how to implement new sampler interfaces using [Anneal.jl](https://github.com/psrenergy/Anneal.jl).
 
-This guide aims to provide be a Tutorial on how to implement new sampler interfaces using [Anneal.jl](https://github.com/psrenergy/Anneal.jl).
-There are basically three paths to follow, each one depending on the desired level of control over the wrapper's behaviour.
 
 ## The `@anew` macro
 Using the [`Anneal.@anew`](@ref anew-macro) macro is the most straightforward way to get your sampler running right now.
@@ -20,62 +19,6 @@ This macro takes two arguments: the identifier of the sampler's `struct`, and a 
 If ommited, the first defaults to `Optimizer`, following regular `MOI` conventions.
 In order to work smoothly, this approach leverages the [`QUBOTools`](https://github.com/psrenergy/QUBOTools.jl) backend.
 
-
-```julia
-Anneal.@anew Optimizer begin
-    name    = "Super Sampler"
-    version = v"0.1.0"
-    domain  = :spin
-
-    attributes = begin
-        NumberOfReads["num_reads"]::Integer = 1_000
-        SuperAttribute["super_attr"]::String = "super"
-    end
-end
-```
-
-```julia
-function Anneal.sample(sampler::Optimizer{T}) where T
-    # ~ Retrieve Problem in Array form ~
-    Q, α, β = Anneal.qubo(Array, sampler)
-
-    # ~ Retrieve Attributes ~ #
-    num_reads = MOI.get(sample, NumberOfReads())
-    @assert num_reads > 0
-
-    super_attr = MOI.get(sample, SuperAttribute())
-    @assert super_attr ∈ ("super", "ultra", "mega")    
-
-    time_data = Dict{String, Any}()
-
-    # ~*~ Call Super Sampler ~*~ #
-    results = @timed ccall(
-        :super_sample,
-        Vector{Int},
-        (
-            Ptr{Cdouble},
-            Cint,
-            Cstring,
-        ),
-        Q,
-        num_reads,
-        super_attr,
-    )
-
-    samples = results.value
-
-    t1 = time()
-
-    # ~ Write Solution Metadata ~ #
-    metadata = Dict{String, Any}(
-        "time"   => time_data,
-        "origin" => "Super C Sampler",
-    )
-
-    # ~ Return Sample Set ~
-    return Anneal.SampleSet{Int, T}(samples, sampler, metadata)
-end
-```
 We expect that most users will be happy with this approach and it is likely that it will be improved and receive support very often.
 
 ## MathOptInterface API Coverage

@@ -1,6 +1,6 @@
 module Anneal
 
-# ~*~ Imports: MathOptInterface ~*~ #
+# ~*~ Imports: JuMP + MathOptInterface ~*~ #
 import JuMP
 import MathOptInterface
 const MOI = MathOptInterface
@@ -17,15 +17,18 @@ export MOI
 
 # ~*~ Imports: QUBOTools Backend ~*~ # 
 import QUBOTools: QUBOTools, SampleSet, Sample, backend
-import QUBOTools: ising, qubo, energy, adjacency, ↑, ↓
+import QUBOTools: ising, qubo, energy, adjacency, reads
+import QUBOTools: ↑, ↓
 
 # ~*~ Expots: QUBOTools Backend ~*~ #
 export QUBOTools, SampleSet, Sample, backend
-export ising, qubo, energy, adjacency, ↑, ↓
+export ising, qubo, energy, adjacency, reads
+export ↑, ↓
 
 # ~*~ See:
 # https://github.com/jump-dev/MathOptInterface.jl/issues/1985
 QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
+QUBOTools.reads(model::JuMP.Model; result::Integer) = QUBOTools.reads(result, JuMP.unsafe_backend(model))
 
 # ~*~ Imports: Tests + Benchmarking ~*~ #
 import Test

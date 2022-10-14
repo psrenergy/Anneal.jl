@@ -1,9 +1,10 @@
 using Documenter
 using Anneal
+using QUBOTools
 
 # Set up to run docstrings with jldoctest
-DocMeta.setdocmeta!(QUBOTools, :DocTestSetup, :(using QUBOTools); recursive = true)
 DocMeta.setdocmeta!(Anneal, :DocTestSetup, :(using Anneal); recursive = true)
+DocMeta.setdocmeta!(QUBOTools, :DocTestSetup, :(using QUBOTools); recursive = true)
 
 makedocs(;
     modules = [Anneal],
@@ -16,7 +17,12 @@ makedocs(;
     ),
     sitename = "Anneal.jl",
     authors = "Pedro Xavier and Tiago Andrade and Joaquim Garcia and David Bernal",
-    pages = ["Home" => "index.md", "Manual" => "manual.md", "Examples" => "examples.md"],
+    pages = [
+        "Home" => "index.md",
+        "Manual" => "manual.md",
+        "Examples" => "examples.md",
+        "Samplers" => "samplers.md",
+    ],
     workdir = @__DIR__,
 )
 

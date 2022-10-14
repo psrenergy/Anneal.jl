@@ -15,6 +15,6 @@ The colors were chosen according to  *Julia's Reference for logo graphics*[¹](#
 
 <a href="#1">¹</a> [github.com/JuliaLang/julia-logo-graphics](https://github.com/JuliaLang/julia-logo-graphics/)
 
-<a href="#2">²</a> [Licensed](/docs/src/assets/fonts/Sunflower%20LICENSE.txt) by the authors for use in this project
+<a href="#2">²</a> [Licensed](./fonts/Sunflower-LICENSE.txt) by the authors for use in this project
 
 <a href="#3">³</a> [danmarshall.github.io/google-font-to-svg-path](https://danmarshall.github.io/google-font-to-svg-path/)
