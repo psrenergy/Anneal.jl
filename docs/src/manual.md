@@ -111,7 +111,7 @@ module SuperSampler
         #   Anneal.jl computes the energy and organizes your
         #   solutions automatically, following the variable
         #   domain conventions specified previously.
-        return Anneal.SampleSet{Int,T}(sampler, states, metadata)
+        return Anneal.SampleSet{T}(sampler, states, metadata)
     end
 
     function super_sample(h, J, u, v; super_attr, kws...)

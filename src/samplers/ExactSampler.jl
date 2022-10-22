@@ -15,25 +15,23 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     n = MOI.get(sampler, MOI.NumberOfVariables())
     N = 2^n - 1
 
-    # ~*~ Timing Information ~*~ #
-    time_data = Dict{String,Any}()
-
     # ~*~ Sample All States ~*~ #
-    states = let results = @timed Vector{Int}[digits(i; base=2, pad=n) for i = 0:N]
-        time_data["sampling"] = results.time
+    result = @timed Vector{Int}[digits(i; base=2, pad=n) for i = 0:N]
+    states = result.value
 
-        results.value
-    end
-
+    # ~*~ Timing Information ~*~ #
+    time_data = Dict{String,Any}(
+        "effective" => result.time
+    )
 
     # ~*~ Write Solution Metadata ~*~ #
     metadata = Dict{String,Any}(
         "time"   => time_data,
-        "origin" => "Exact Sampler"
+        "origin" => "Exact Sampler @ Anneal.jl"
     )
 
     # ~*~ Return Sample Set ~*~ #
-    return Anneal.SampleSet{Int,T}(sampler, states, metadata)
+    return Anneal.SampleSet{T}(sampler, states, metadata)
 end
 
 end # module

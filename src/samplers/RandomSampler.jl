@@ -15,18 +15,17 @@ end
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Attributes ~*~ #
-    n = MOI.get(sampler, MOI.NumberOfVariables())
+    n         = MOI.get(sampler, MOI.NumberOfVariables())
     num_reads = MOI.get(sampler, RandomSampler.NumberOfReads())
 
-    # ~*~ Timing Information ~*~ #
-    time_data = Dict{String,Any}()
-
     # ~*~ Sample Random States ~*~ #
-    states = let results = @timed Vector{Int}[rand(Bool, n) for _ = 1:num_reads]
-        time_data["sampling"] = results.time
+    result = @timed sample_states(n, num_reads)
+    states = result.value
 
-        results.value
-    end
+    # ~*~ Timing Information ~*~ #
+    time_data = Dict{String,Any}(
+        "effective" => result.time
+    )
 
     # ~*~ Write Solution Metadata ~*~ #
     metadata = Dict{String,Any}(
@@ -35,7 +34,11 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     )
 
     # ~*~ Return Sample Set ~*~ #
-    Anneal.SampleSet{Int,T}(sampler, states, metadata)
+    return Anneal.SampleSet{T}(sampler, states, metadata)
+end
+
+function sample_states(n::Integer, num_reads::Integer)
+    return Vector{Int}[rand((0,1), n) for _ = 1:num_reads]
 end
 
 end # module
