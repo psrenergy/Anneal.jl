@@ -13,10 +13,9 @@ end
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Attributes ~*~ #
     n = MOI.get(sampler, MOI.NumberOfVariables())
-    N = 2^n - 1
 
     # ~*~ Sample All States ~*~ #
-    result = @timed Vector{Int}[digits(i; base=2, pad=n) for i = 0:N]
+    result = @timed sample_states(n)
     states = result.value
 
     # ~*~ Timing Information ~*~ #
@@ -33,5 +32,7 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Return Sample Set ~*~ #
     return Anneal.SampleSet{T}(sampler, states, metadata)
 end
+
+sample_states(n::Integer) = digits.(Int, 0:(2^n - 1); base=2, pad=n)
 
 end # module
