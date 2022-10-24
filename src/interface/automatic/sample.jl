@@ -1,15 +1,15 @@
 function Anneal.SampleSet{T,U}(
     sampler::AutomaticSampler,
-    _states::Vector{Vector{U}},
+    states::Vector{Vector{U}},
     metadata::Union{Dict{String,Any},Nothing}=nothing,
 ) where {T,U}
     states = QUBOTools.swap_domain(
         Anneal.solver_domain(sampler),
         Anneal.model_domain(sampler),
-        _states
+        states
     )
 
-    samples = Anneal.Sample{T,U}[
+    samples = [
         Anneal.Sample{T,U}(state, Anneal.energy(sampler, state))
         for state in states
     ]

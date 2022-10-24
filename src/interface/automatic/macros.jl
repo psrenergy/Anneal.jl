@@ -182,9 +182,9 @@ function __anew_parse_params(block::Expr)
     end
 
     params[:domain] = if params[:domain] === :bool
-        QUBOTools.BoolDomain
+        QUBOTools.BoolDomain()
     elseif params[:domain] === :spin
-        QUBOTools.SpinDomain
+        QUBOTools.SpinDomain()
     end
 
     return params
@@ -357,10 +357,10 @@ macro anew(raw_args...)
             end
         end
 
-        Anneal.solver_sense(::$(esc(id))) = $(esc(sense))
+        Anneal.solver_sense(::$(esc(id)))  = $(esc(sense))
         Anneal.solver_domain(::$(esc(id))) = $(esc(domain))
         
-        MOI.get(::$(esc(id)), ::MOI.SolverName) = $(esc(name))
+        MOI.get(::$(esc(id)), ::MOI.SolverName)    = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))
 
         $(attributes...)
