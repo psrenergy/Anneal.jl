@@ -26,7 +26,7 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Write Solution Metadata ~*~ #
     metadata = Dict{String,Any}(
         "time"   => time_data,
-        "origin" => "Identity Sampler"
+        "origin" => "Identity Sampler @ Anneal.jl"
     )
 
     # ~*~ Return Sample Set ~*~ #

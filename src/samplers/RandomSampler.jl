@@ -14,42 +14,59 @@ Anneal.@anew Optimizer begin
 end
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
+    # ~*~ Retrieve Model ~*~ #
+    Q, α, β = Anneal.qubo(sampler, Dict, T)
+
     # ~*~ Retrieve Attributes ~*~ #
-    n         = MOI.get(sampler, MOI.NumberOfVariables())
-    seed      = MOI.get(sampler, RandomSampler.RandomSeed())
-    num_reads = MOI.get(sampler, RandomSampler.NumberOfReads())
+    n    = MOI.get(sampler, MOI.NumberOfVariables())
+    m    = MOI.get(sampler, RandomSampler.NumberOfReads())
+    seed = MOI.get(sampler, RandomSampler.RandomSeed())
 
     # ~*~ Validate Input ~*~ #
     if isnothing(seed)
         seed = trunc(Int, time())
     end
 
+    @assert m >= 0
     @assert seed >= 0
-    @assert num_reads >= 0
 
     # ~*~ Sample Random States ~*~ #
-    rng = MersenneTwister(seed)
-
-    result = @timed sample_states(rng, n, num_reads)
-    states = result.value
+    rng     = MersenneTwister(seed)
+    results = @timed random_sample(rng, Q, α, β, n, m)
+    samples = results.value
 
     # ~*~ Timing Information ~*~ #
     time_data = Dict{String,Any}(
-        "effective" => result.time
+        "effective" => results.time
     )
 
     # ~*~ Write Solution Metadata ~*~ #
     metadata = Dict{String,Any}(
         "time"   => time_data,
-        "origin" => "Random Sampler"
+        "origin" => "Random Sampler @ Anneal.jl"
     )
 
     # ~*~ Return Sample Set ~*~ #
-    return Anneal.SampleSet{T}(sampler, states, metadata)
+    return Anneal.SampleSet{T}(samples, metadata)
 end
 
-function sample_states(rng, n::Integer, num_reads::Integer)
-    return [rand(rng, (0,1), n) for _ = 1:num_reads]
+function random_sample(
+    rng,
+    Q::Dict{Tuple{Int,Int},T},
+    α::T,
+    β::T,
+    n::Integer,
+    m::Integer,
+) where {T}
+    samples = Vector{Sample{T,Int}}(undef, m)
+
+    for i = 1:m
+        ψ = rand(rng, (0, 1), n)
+
+        samples[i] = Sample{T,Int}(ψ, α * (Anneal.energy(Q, ψ) + β))
+    end
+
+    return samples
 end
 
 end # module

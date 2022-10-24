@@ -1,50 +1,21 @@
-function Anneal.SampleSet{T,U}(
-    sampler::AutomaticSampler,
-    states::Vector{Vector{U}},
-    metadata::Union{Dict{String,Any},Nothing}=nothing,
-) where {T,U}
-    states = QUBOTools.swap_domain(
-        Anneal.solver_domain(sampler),
-        Anneal.model_domain(sampler),
-        states
-    )
-
-    samples = [
-        Anneal.Sample{T,U}(state, Anneal.energy(sampler, state))
-        for state in states
-    ]
-
-    return Anneal.SampleSet{T,U}(samples, metadata)
-end
-
-@doc raw"""
-    __parse_results(sampler::AutomaticSampler, samples::Anneal.SampleSet)
-    __parse_results(sampler::AutomaticSampler{T}, samples::Vector{Vector{U}}) where {T,U<:Integer}
-""" function __parse_results end
-
-function __parse_results(
-    ::AutomaticSampler{T},
+function remap_results(
+    sampler::AutomaticSampler{T},
     results::Anneal.SampleSet{T,U},
 ) where {T,U}
-    return results
-end
+    S = Anneal.solver_domain(sampler)
+    M = Anneal.model_domain(sampler)
 
-function __parse_results(
-    sampler::AutomaticSampler{T},
-    results::Vector{Vector{U}},
-) where {T,U}
-    return Anneal.SampleSet{T,U}(sampler, results)
+    return QUBOTools.swap_domain(S, M, results)
 end
 
 function Anneal.sample!(sampler::AutomaticSampler)
     # ~*~ Run Sampling ~*~ # 
-    result = @timed Anneal.sample(sampler)
-
-    sampleset = Anneal.__parse_results(sampler, result.value)
+    results   = @timed Anneal.sample(sampler)
+    sampleset = Anneal.remap_results(sampler, results.value)
 
     # ~*~ Timing Information ~*~ #
     time_data = Dict{String,Any}(
-        "total" => result.time
+        "total" => results.time
     )
 
     # ~*~ Time metadata ~*~ #
@@ -55,8 +26,8 @@ function Anneal.sample!(sampler::AutomaticSampler)
     end
 
     # ~*~ Update sampleset ~*~ #
-    backend = QUBOTools.backend(sampler)
-    backend.sampleset = sampleset
+    model = Anneal.backend(sampler)::QUBOTools.StandardQUBOModel
+    model.sampleset = sampleset
 
     return nothing
 end

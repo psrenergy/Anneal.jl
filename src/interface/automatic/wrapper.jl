@@ -7,7 +7,7 @@ function MOI.empty!(sampler::AutomaticSampler)
         empty!(QUBOTools.backend(sampler))
     end
 
-    nothing
+    return nothing
 end
 
 function MOI.is_empty(sampler::AutomaticSampler)
