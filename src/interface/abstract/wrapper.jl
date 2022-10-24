@@ -31,3 +31,10 @@ MOI.supports(
 
 # ~ By default, all samplers are their own raw solvers.
 MOI.get(sampler::AbstractSampler, ::MOI.RawSolver) = sampler
+
+# ~ Introduce `reads(model; result = i)` interface.
+#   The `reads` function is exported.
+QUBOTools.reads(model::JuMP.Model; result::Integer) = QUBOTools.reads(JuMP.unsafe_backend(model), result)
+
+# ~ Give access to QUBOTools' queries.
+QUBOTools.backend(model::JuMP.Model) = QUBOTools.backend(JuMP.unsafe_backend(model))
