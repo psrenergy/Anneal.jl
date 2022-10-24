@@ -1,20 +1,20 @@
-function Anneal.SampleSet{U,T}(
+function Anneal.SampleSet{T,U}(
     sampler::AutomaticSampler,
-    _states::Vector{Vector{U}},
+    states::Vector{Vector{U}},
     metadata::Union{Dict{String,Any},Nothing}=nothing,
-) where {U,T}
+) where {T,U}
     states = QUBOTools.swap_domain(
         Anneal.solver_domain(sampler),
         Anneal.model_domain(sampler),
-        _states
+        states
     )
 
-    samples = Anneal.Sample{U,T}[
-        Anneal.Sample{U,T}(state, 1, Anneal.energy(state, sampler))
+    samples = [
+        Anneal.Sample{T,U}(state, Anneal.energy(sampler, state))
         for state in states
     ]
 
-    return Anneal.SampleSet{U,T}(samples, metadata)
+    return Anneal.SampleSet{T,U}(samples, metadata)
 end
 
 @doc raw"""
@@ -24,28 +24,28 @@ end
 
 function __parse_results(
     ::AutomaticSampler{T},
-    results::Anneal.SampleSet{U,T},
-) where {U,T}
+    results::Anneal.SampleSet{T,U},
+) where {T,U}
     return results
 end
 
 function __parse_results(
     sampler::AutomaticSampler{T},
     results::Vector{Vector{U}},
-) where {U,T}
-    return Anneal.SampleSet{U,T}(sampler, results)
+) where {T,U}
+    return Anneal.SampleSet{T,U}(sampler, results)
 end
 
 function Anneal.sample!(sampler::AutomaticSampler)
-    # ~*~ Timing Information ~*~ #
-    time_data = Dict{String,Any}()
-    
     # ~*~ Run Sampling ~*~ # 
-    sampleset = let results = @timed Anneal.sample(sampler)
-        time_data["total"] = results.time
-        
-        Anneal.__parse_results(sampler, results.value)
-    end
+    result = @timed Anneal.sample(sampler)
+
+    sampleset = Anneal.__parse_results(sampler, result.value)
+
+    # ~*~ Timing Information ~*~ #
+    time_data = Dict{String,Any}(
+        "total" => result.time
+    )
 
     # ~*~ Time metadata ~*~ #
     if !haskey(sampleset.metadata, "time")
@@ -58,5 +58,5 @@ function Anneal.sample!(sampler::AutomaticSampler)
     backend = QUBOTools.backend(sampler)
     backend.sampleset = sampleset
 
-    nothing
+    return nothing
 end

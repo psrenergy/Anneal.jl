@@ -18,17 +18,18 @@ export MOI
 # ~*~ Imports: QUBOTools Backend ~*~ # 
 import QUBOTools: QUBOTools, SampleSet, Sample, backend
 import QUBOTools: ising, qubo, energy, adjacency, reads
+import QUBOTools: sampleset
 import QUBOTools: ↑, ↓
 
 # ~*~ Expots: QUBOTools Backend ~*~ #
 export QUBOTools, SampleSet, Sample, backend
 export ising, qubo, energy, adjacency, reads
+export sampleset
 export ↑, ↓
 
 # ~*~ See:
 # https://github.com/jump-dev/MathOptInterface.jl/issues/1985
 QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
-QUBOTools.reads(model::JuMP.Model; result::Integer) = QUBOTools.reads(result, JuMP.unsafe_backend(model))
 
 # ~*~ Imports: Tests + Benchmarking ~*~ #
 import Test

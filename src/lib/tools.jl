@@ -214,8 +214,8 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     end
 
     if flag
-        # ~ Throws default message
-        #   (ToQUBO.jl advertisement 😎)
+        # Throws default message
+        # a.k.a. ToQUBO.jl advertisement 😎
         throw(QUBOError(nothing))
     end
 
@@ -224,17 +224,16 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
 
     # ~*~ Objective Sense ~*~ #
     sense = MOI.get(model, MOI.ObjectiveSense())
-
     scale = one(T) # ~ Assuming MIN_SENSE
 
     # ~*~ Invert Problem Sense ~*~ #
     if sense === MOI.MAX_SENSE
         L = Dict{VI,T}(i => -l for (i, l) in L)
         Q = Dict{Tuple{VI,VI},T}(ij => -q for (ij, q) in Q)
-        scale = -scale
+        scale  = -scale
         offset = -offset
     end
 
     # ~*~ Return Model ~*~ #
-    return QUBOTools.StandardQUBOModel{VI,Int,T,D}(L, Q; scale = scale, offset = offset)
+    return QUBOTools.StandardQUBOModel{D,VI,T,Int}(L, Q; scale = scale, offset = offset)
 end

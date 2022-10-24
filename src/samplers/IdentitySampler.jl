@@ -14,23 +14,14 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Attributes ~*~ #
     n = MOI.get(sampler, MOI.NumberOfVariables())
 
-    # ~*~ Timing Information ~*~ #
-    time_data = Dict{String,Any}()
-
     # ~*~ Retrieve warm-start state ~*~ #
-    state = let results = @timed Int[
-            MOI.get(
-                sampler,
-                MOI.VariablePrimalStart(),
-                QUBOTools.variable_inv(sampler, i)
-            )
-            for i = 1:n
-        ]
+    result = sample_state(sampler, n)
+    states = [result.value]
 
-        time_data["sampling"] = results.time
-
-        results.value
-    end
+    # ~*~ Timing Information ~*~ #
+    time_data = Dict{String,Any}(
+        "effective" => result.time
+    )
 
     # ~*~ Write Solution Metadata ~*~ #
     metadata = Dict{String,Any}(
@@ -39,7 +30,13 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     )
 
     # ~*~ Return Sample Set ~*~ #
-    Anneal.SampleSet{Int,T}(sampler, [state], metadata)
+    return Anneal.SampleSet{T}(sampler, states, metadata)
+end
+
+function sample_state(sampler::Optimizer, n::Integer)
+    v = MOI.VariableIndex[QUBOTools.variable_inv(sampler, i) for i = 1:n]
+
+    return MOI.get.(sampler, MOI.VariablePrimalStart(), v)
 end
 
 end # module
