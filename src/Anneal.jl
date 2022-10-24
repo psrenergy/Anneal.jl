@@ -33,6 +33,7 @@ QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
 
 # ~*~ Imports: Tests + Benchmarking ~*~ #
 import Test
+import BenchmarkTools
 
 # -*- Includes: Library -*- #
 include("lib/error.jl")
