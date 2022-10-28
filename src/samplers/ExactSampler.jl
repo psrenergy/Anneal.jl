@@ -51,6 +51,4 @@ function exact_sample(Q::Dict{Tuple{Int,Int},T}, α::T, β::T, n::Integer) where
     return samples
 end
 
-
-
 end # module

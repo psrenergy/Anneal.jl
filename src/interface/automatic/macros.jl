@@ -328,7 +328,7 @@ macro anew(raw_args...)
 
     # ~ For this mechanism to work it is very important that the
     #   @anew macro is called at most once inside each module.
-    quote
+    return quote
         const __SAMPLER_ATTRIBUTES = Anneal.SamplerAttribute[]
 
         mutable struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
@@ -349,16 +349,18 @@ macro anew(raw_args...)
             end
         end
 
-        Anneal.solver_sense(::$(esc(id)))  = $(esc(sense))
-        Anneal.solver_domain(::$(esc(id))) = $(esc(domain))
+        $(attributes...)
 
         MOI.get(::$(esc(id)), ::MOI.SolverName)    = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))
+        
+        Anneal.solver_sense(::$(esc(id)))  = $(esc(sense))
+        Anneal.solver_domain(::$(esc(id))) = $(esc(domain))
 
-        $(attributes...)
-
-        function test(; examples::Bool = false)
+        function $(esc(:test))(; examples::Bool = false)
             Anneal.test($(esc(id)); examples = examples)
+
+            return nothing
         end
     end
 end
