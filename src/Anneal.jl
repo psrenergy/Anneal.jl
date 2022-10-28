@@ -18,13 +18,13 @@ export MOI
 # ~*~ Imports: QUBOTools Backend ~*~ # 
 import QUBOTools: QUBOTools, SampleSet, Sample, backend
 import QUBOTools: ising, qubo, energy, adjacency, reads
-import QUBOTools: sampleset, variables
+import QUBOTools: sampleset, variables, indices
 import QUBOTools: ↑, ↓
 
 # ~*~ Expots: QUBOTools Backend ~*~ #
 export QUBOTools, SampleSet, Sample, backend
 export ising, qubo, energy, adjacency, reads
-export sampleset, variables
+export sampleset, variables, indices
 export ↑, ↓
 
 # ~*~ See:
