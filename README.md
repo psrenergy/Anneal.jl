@@ -79,6 +79,7 @@ end
 ### Interfaces
 | Module Name                 | Descripition                                                                                                                                               | Package                                             |
 | :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
+| `DWave `                 | Wrapper for D-Wave's Quantum Annealing API. | [DWave.jl](https://github.com/psrenergy/DWave.jl) |
 | `DWaveNeal`                 | Wrapper for D-Wave's open-source Simulated Annealing sampler. | [DWaveNeal.jl](https://github.com/psrenergy/DWaveNeal.jl) |
 | `QuantumAnnealingInterface` | Wrapper for LANL's Quantum Annealing simulator | [QuantumAnnealingInterface.jl](https://github.com/psrenergy/QuantumAnnealingInterface.jl) |
 
@@ -101,29 +102,30 @@ As the diagram below indicates, the _automatic_ type is a subtype of the general
 ```mermaid
 flowchart TB;
     OPTIMIZER(["<code>MOI.AbstractOptimizer</code>"]);
-    ABSTRACT(["<code>AbstractSampler{T}</code>"]);
-    AUTOMATIC(["<code>AutomaticSampler{T}</code>"]);
+    ABSTRACT(["<code>AbstractSampler</code>"]);
+    AUTOMATIC(["<code>AutomaticSampler</code>"]);
     
     OPTIMIZER --> ABSTRACT --> AUTOMATIC;
 
     subgraph UTILITY [Utility]
         direction LR
-        EXACT["<code>ExactSampler.Optimizer{T}</code>"];
-        IDENTITY["<code>IdentiySampler.Optimizer{T}</code>"];
-        RANDOM["<code>RandomSampler.Optimizer{T}</code>"];
+        EXACT["<code>ExactSampler</code>"];
+        IDENTITY["<code>IdentiySampler</code>"];
+        RANDOM["<code>RandomSampler</code>"];
     end
     
     subgraph HEURISTICS [Heuristics]
         direction LR
-        GREEDY["<code>IsingSolvers.GreedyDescent.Optimizer{T}</code>"];
-        ILP["<code>IsingSolvers.ILP.Optimizer{T}</code>"];
-        MCMC["<code>IsingSolvers.MCMCRandom.Optimizer{T}</code>"];
+        GREEDY["<code>IsingSolvers.GreedyDescent</code>"];
+        ILP["<code>IsingSolvers.ILP</code>"];
+        MCMC["<code>IsingSolvers.MCMCRandom</code>"];
     end
     
     subgraph INTERFACES [Interfaces]
         direction LR
-        DWAVENEAL["<code>DWaveNeal.Optimizer{T}</code>"];
-        QUANTUMANNEALING["<code>QuantumAnnealingInterface.Optimizer{T}</code>"];
+        DWAVE["<code>DWave</code>"];
+        DWAVENEAL["<code>DWaveNeal</code>"];
+        QUANTUMANNEALING["<code>QuantumAnnealingInterface</code>"];
     end
        
     AUTOMATIC --> UTILITY;
