@@ -25,7 +25,9 @@ function __anew_parse_id()
 end
 
 function __anew_parse_param(::Val{X}, ::Any) where {X}
-    __anew_error("invalid parameter '$X', valid options are: 'name', 'version', 'domain', 'attributes'")
+    __anew_error(
+        "invalid parameter '$X', valid options are: 'name', 'version', 'domain', 'attributes'",
+    )
 end
 
 function __anew_parse_param(::Val{:name}, value)
@@ -79,8 +81,7 @@ end
 function __anew_parse_param(::Val{:attributes}, value)
     if value isa Expr && value.head === :block
         return Dict{Symbol,Any}[
-            attr for attr in __anew_parse_attr.(value.args)
-            if !isnothing(attr)
+            attr for attr in __anew_parse_attr.(value.args) if !isnothing(attr)
         ]
     else
         __anew_error("parameter 'attributes' must be a `begin...end` block")
@@ -200,17 +201,13 @@ end
 
 function __anew_parse(expr)
     if expr isa Symbol # Name
-        return (
-            __anew_parse_id(expr),
-            __anew_parse_params(),
-        )
+        return (__anew_parse_id(expr), __anew_parse_params())
     elseif (expr isa Expr && expr.head === :block)
-        return (
-            __anew_parse_id(),
-            __anew_parse_params(expr),
-        )
+        return (__anew_parse_id(), __anew_parse_params(expr))
     else
-        __anew_error("single argument must be either an identifier or a `begin...end` block")
+        __anew_error(
+            "single argument must be either an identifier or a `begin...end` block",
+        )
     end
 end
 
@@ -248,9 +245,9 @@ function __anew_attr(attr)
                 __SAMPLER_ATTRIBUTES,
                 Anneal.SamplerAttribute{$(esc(type))}(
                     $(esc(default));
-                    rawattr=$(esc(rawattr)),
-                    optattr=$(esc(optattr))()
-                )
+                    rawattr = $(esc(rawattr)),
+                    optattr = $(esc(optattr))(),
+                ),
             )
         end
     elseif !isnothing(optattr)
@@ -261,8 +258,8 @@ function __anew_attr(attr)
                 __SAMPLER_ATTRIBUTES,
                 Anneal.SamplerAttribute{$(esc(type))}(
                     $(esc(default));
-                    optattr=$(esc(optattr))()
-                )
+                    optattr = $(esc(optattr))(),
+                ),
             )
         end
     elseif !isnothing(rawattr)
@@ -271,8 +268,8 @@ function __anew_attr(attr)
                 __SAMPLER_ATTRIBUTES,
                 Anneal.SamplerAttribute{$(esc(type))}(
                     $(esc(default));
-                    rawattr=$(esc(rawattr))
-                )
+                    rawattr = $(esc(rawattr)),
+                ),
             )
         end
     else
@@ -318,16 +315,13 @@ macro anew(raw_args...)
         push!(Anneal.__ANEW_REGISTRY, __module__)
     end
 
-    args = map(
-        a -> macroexpand(__module__, a),
-        raw_args,
-    )
+    args = map(a -> macroexpand(__module__, a), raw_args)
 
     id, params = __anew_parse(args...)
 
-    name = params[:name]
-    sense = params[:sense]
-    domain = params[:domain]
+    name    = params[:name]
+    sense   = params[:sense]
+    domain  = params[:domain]
     version = params[:version]
 
     attributes = __anew_attr.(params[:attributes])
@@ -346,9 +340,7 @@ macro anew(raw_args...)
             function $(esc(id)){T}(args...; kws...) where {T}
                 return new{T}(
                     nothing,
-                    Anneal.SamplerAttributeData{T}(
-                        copy.(__SAMPLER_ATTRIBUTES)
-                    )
+                    Anneal.SamplerAttributeData{T}(copy.(__SAMPLER_ATTRIBUTES)),
                 )
             end
 
@@ -359,10 +351,14 @@ macro anew(raw_args...)
 
         Anneal.solver_sense(::$(esc(id)))  = $(esc(sense))
         Anneal.solver_domain(::$(esc(id))) = $(esc(domain))
-        
+
         MOI.get(::$(esc(id)), ::MOI.SolverName)    = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))
 
         $(attributes...)
+
+        function test(; examples::Bool = false)
+            Anneal.test($(esc(id)); examples = examples)
+        end
     end
 end

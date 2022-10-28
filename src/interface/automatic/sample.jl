@@ -1,4 +1,8 @@
-function remap_results(
+function parse_results(::AutomaticSampler, ::S) where {S}
+    throw(Anneal.SampleError("Invalid results of type '$S'"))
+end
+
+function parse_results(
     sampler::AutomaticSampler{T},
     results::Anneal.SampleSet{T,U},
 ) where {T,U}
@@ -11,7 +15,7 @@ end
 function Anneal.sample!(sampler::AutomaticSampler)
     # ~*~ Run Sampling ~*~ # 
     results   = @timed Anneal.sample(sampler)
-    sampleset = Anneal.remap_results(sampler, results.value)
+    sampleset = Anneal.parse_results(sampler, results.value)
 
     # ~*~ Timing Information ~*~ #
     time_data = Dict{String,Any}(
