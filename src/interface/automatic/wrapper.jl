@@ -79,7 +79,7 @@ end
 function MOI.get(sampler::AutomaticSampler, ::MOI.RawStatusString)
     sampleset = QUBOTools.sampleset(sampler)::SampleSet
 
-    if isnothing(sampleset) || !haskey(samplset.metadata, "status")
+    if isnothing(sampleset) || !haskey(sampleset.metadata, "status")
         return ""
     else
         return sampleset.metadata["status"]::String
