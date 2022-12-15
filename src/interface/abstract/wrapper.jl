@@ -48,7 +48,27 @@ MOI.get(::AbstractSampler, ::MOI.DualStatus) = MOI.NO_SOLUTION
 
 # ~ Introduce `reads(model; result = i)` interface.
 #   The `reads` function is exported.
-QUBOTools.reads(model::JuMP.Model; result::Integer) = QUBOTools.reads(model, result)
+function QUBOTools.reads(model::JuMP.Model; result::Integer = 1)
+    return QUBOTools.reads(model, result)
+end
 
 # ~ Give access to QUBOTools' queries.
-QUBOTools.backend(model::JuMP.Model) = QUBOTools.backend(JuMP.unsafe_backend(model))
+if !hasmethod(QUBOTools.backend, (JuMP.Model,))
+    # Other packages, such as ToQUBO.jl, also would like to apply 
+    # this extesion to connect JuMP and QUBOTools.
+    # ToQUBO.jl and Anneal.jl share many use cases, but are inde-
+    # pendent in a conceptual sense.
+    function QUBOTools.backend(model::JuMP.Model)
+        return QUBOTools.backend(JuMP.unsafe_backend(model))
+    end
+end
+
+function QUBOTools.Sense(sense::MOI.OptimizationSense)
+    if sense === MOI.MIN_SENSE
+        return QUBOTools.Sense(:min)
+    elseif sense === MOI.MAX_SENSE
+        return QUBOTools.Sense(:max)
+    else
+        error("Invalid sense for QUBO: '$sense'")
+    end
+end

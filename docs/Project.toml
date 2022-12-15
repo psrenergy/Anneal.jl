@@ -1,12 +1,12 @@
 [deps]
-Anneal = "e4d9eb7f-b088-426e-aeb5-1c0dae3d8abb"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Anneal           = "e4d9eb7f-b088-426e-aeb5-1c0dae3d8abb"
+Documenter       = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+JuMP             = "4076af6c-e467-56ae-b986-b466b2749572"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
-QUBOTools = "60eb5b62-0a39-4ddc-84c5-97d2adff9319"
+QUBOTools        = "60eb5b62-0a39-4ddc-84c5-97d2adff9319"
 
 [compat]
-Documenter = "0.27"
-JuMP = "1"
+Documenter       = "0.27"
+JuMP             = "1"
 MathOptInterface = "1"
-QUBOTools = "0.4"
+QUBOTools        = "0.5"

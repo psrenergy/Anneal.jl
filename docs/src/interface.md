@@ -1,7 +1,6 @@
 # A new Sampler
 This guide aims to provide a tutorial on how to implement new sampler interfaces using [Anneal.jl](https://github.com/psrenergy/Anneal.jl).
 
-
 ## The `@anew` macro
 Using the [`Anneal.@anew`](@ref anew-macro) macro is the most straightforward way to get your sampler running right now.
 Apart from the macro call it is needed to implement the [`Anneal.sample`](@ref) method.

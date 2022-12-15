@@ -6,10 +6,19 @@ function parse_results(
     sampler::AutomaticSampler{T},
     results::Anneal.SampleSet{T,U},
 ) where {T,U}
-    S = Anneal.solver_domain(sampler)
-    M = Anneal.model_domain(sampler)
+    results = QUBOTools.swap_domain(
+        Anneal.solver_domain(sampler),
+        Anneal.model_domain(sampler),
+        results
+    )
 
-    return QUBOTools.swap_domain(S, M, results)
+    results = QUBOTools.swap_sense(
+        Anneal.solver_sense(sampler),
+        Anneal.model_sense(sampler),
+        results
+    )
+
+    return results
 end
 
 function Anneal.sample!(sampler::AutomaticSampler)
@@ -18,20 +27,20 @@ function Anneal.sample!(sampler::AutomaticSampler)
     sampleset = Anneal.parse_results(sampler, results.value)
 
     # ~*~ Timing Information ~*~ #
-    time_data = Dict{String,Any}(
-        "total" => results.time
-    )
+    timedata = Dict{String,Any}("total" => results.time)
+    metadata = QUBOTools.metadata(sampleset)
 
     # ~*~ Time metadata ~*~ #
-    if !haskey(sampleset.metadata, "time")
-        sampleset.metadata["time"] = time_data
+    if !haskey(metadata, "time")
+        metadata["time"] = timedata
     elseif !haskey(sampleset.metadata["time"], "total")
-        sampleset.metadata["time"]["total"] = time_data["total"]
+        metadata["time"]["total"] = timedata["total"]
     end
 
     # ~*~ Update sampleset ~*~ #
-    model = Anneal.backend(sampler)::QUBOTools.StandardQUBOModel
-    model.sampleset = sampleset
+    model = frontend(sampler)::QUBOTools.Model
+
+    copy!(QUBOTools.sampleset(model), sampleset)
 
     return nothing
 end

@@ -176,16 +176,12 @@ function __anew_parse_params(block::Expr)
         end
     end
 
-    params[:sense] = if params[:sense] === :min
-        MOI.MIN_SENSE
-    else
-        MOI.MAX_SENSE
-    end
-
-    params[:domain] = if params[:domain] === :bool
-        QUBOTools.BoolDomain()
+    params[:sense] = QUBOTools.Sense(params[:sense])
+    
+    if params[:domain] === :bool
+        params[:domain] = QUBOTools.BoolDomain()
     elseif params[:domain] === :spin
-        QUBOTools.SpinDomain()
+        params[:domain] = QUBOTools.SpinDomain()
     end
 
     return params
@@ -216,23 +212,25 @@ function __anew_parse()
 end
 
 function __anew_parse(id, block)
-    id = if !(id isa Symbol)
+    params = Dict{Symbol,Any}()
+
+    if !(id isa Symbol)
         __anew_error("first argument must be an identifier")
-    else
-        __anew_parse_id(id)
     end
+    
+    params[:id] = __anew_parse_id(id)
 
-    params = if !(block isa Expr && block.head === :block)
+    if !(block isa Expr && block.head === :block)
         __anew_error("second argument must be a `begin...end` block")
-    else
-        __anew_parse_params(block)
     end
-
-    return (id, params)
+        
+    merge!(params, __anew_parse_params(block))
+    
+    return params
 end
 
 function __anew_attr(attr)
-    type = attr[:type]
+    type    = attr[:type]
     default = attr[:default]
     optattr = attr[:optattr]
     rawattr = attr[:rawattr]
@@ -315,10 +313,10 @@ macro anew(raw_args...)
         push!(Anneal.__ANEW_REGISTRY, __module__)
     end
 
-    args = map(a -> macroexpand(__module__, a), raw_args)
+    args   = map(a -> macroexpand(__module__, a), raw_args)
+    params = __anew_parse(args...)
 
-    id, params = __anew_parse(args...)
-
+    id      = params[:id]
     name    = params[:name]
     sense   = params[:sense]
     domain  = params[:domain]
@@ -333,30 +331,33 @@ macro anew(raw_args...)
 
         mutable struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
             # ~*~ QUBOTools Backend model ~*~ #
-            model::Union{QUBOTools.StandardQUBOModel,Nothing}
+            source::Union{QUBOTools.Model,Nothing}
+            target::Union{QUBOTools.Model,Nothing}
             # ~*~ Attributes ~*~ #
             attrs::Anneal.SamplerAttributeData{T}
 
             function $(esc(id)){T}(args...; kws...) where {T}
                 return new{T}(
                     nothing,
+                    nothing,
                     Anneal.SamplerAttributeData{T}(copy.(__SAMPLER_ATTRIBUTES)),
                 )
             end
-
-            function $(esc(id))(args...; kws...)
-                return $(esc(id)){Float64}(args...; kws...)
-            end
         end
+
+        $(esc(id))(args...; kws...) = $(esc(id)){Float64}(args...; kws...)
 
         $(attributes...)
 
+        # MOI interface
         MOI.get(::$(esc(id)), ::MOI.SolverName)    = $(esc(name))
         MOI.get(::$(esc(id)), ::MOI.SolverVersion) = $(esc(version))
         
+        # domain/sense mapping
         Anneal.solver_sense(::$(esc(id)))  = $(esc(sense))
         Anneal.solver_domain(::$(esc(id))) = $(esc(domain))
 
+        # test function
         function $(esc(:test))(; examples::Bool = false)
             Anneal.test($(esc(id)); examples = examples)
 
