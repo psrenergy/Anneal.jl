@@ -1,6 +1,16 @@
 # ~*~ QUBOTools.jl ~*~ #
 QUBOTools.backend(sampler::AutomaticSampler) = sampler.model
 
+function Anneal.qubo(sampler::AutomaticSampler)
+    Q, α, β = QUBOTools.qubo(QUBOTools.backend(sampler))
+
+    if Anneal.solver_sense(sampler) !== Anneal.model_sense(sampler)
+        Q, α, β = QUBOTools.invert_sense(Q, α, β)
+    end
+
+    return (Q, α, β)
+end
+
 # ~*~ :: MathOptInterface :: ~*~ #
 function MOI.empty!(sampler::AutomaticSampler)
     if !isnothing(sampler.model)
@@ -77,7 +87,7 @@ function MOI.get(sampler::AutomaticSampler, ds::MOI.DualStatus, ::VI)
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.RawStatusString)
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    sampleset = QUBOTools.sampleset(sampler)::Union{SampleSet,Nothing}
 
     if isnothing(sampleset) || !haskey(sampleset.metadata, "status")
         return ""
