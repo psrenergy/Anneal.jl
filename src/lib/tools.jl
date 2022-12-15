@@ -150,7 +150,10 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     # ~*~ Check for emptiness ~*~ #
     if MOI.is_empty(model)
         @warn "The given model is empty"
-        return QUBOTools.StandardQUBOModel{VI,Int,T,QUBOTools.BoolDomain}()
+        return QUBOTools.StandardQUBOModel{VI,Int,T,QUBOTools.BoolDomain}(
+            Dict{VI,T}(),
+            Dict{Tuple{VI,VI},T}(),
+        )
     end
 
     # ~*~ Validate Model ~*~ #

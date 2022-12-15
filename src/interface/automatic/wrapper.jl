@@ -42,7 +42,7 @@ function Base.show(io::IO, sampler::AutomaticSampler)
 
         with backend:
         $(QUBOTools.backend(sampler))
-        """
+        """,
     )
 end
 
@@ -182,22 +182,35 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.NumberOfVariables)
     return QUBOTools.domain_size(sampler)
 end
 
-# ~*~ :: I/O :: ~*~ #
-function Base.write(filename::String, sampler::AutomaticSampler)
+# ~*~ File IO: Base API ~*~ #
+function Base.write(filename::AbstractString, sampler::AutomaticSampler)
     return write(
         filename,
-        convert(
-            QUBOTools.infer_model_type(filename),
-            QUBOTools.backend(sampler),
-        )
+        convert(QUBOTools.infer_model_type(filename), QUBOTools.backend(sampler)),
     )
 end
 
-function Base.read!(filename::String, sampler::AutomaticSampler)
+function Base.read!(filename::AbstractString, sampler::AutomaticSampler{T}) where {T}
     source = read(filename, QUBOTools.infer_model_type(filename))
-    target = QUBOTools.backend(sampler)::QUBOTools.StandardQUBOModel
+    domain = QUBOTools.domain(source)
 
-    copy!(target, source)
+    sampler.model = QUBOTools.StandardQUBOModel{VI,Int,T,domain}(
+        QUBOTools.linear_terms(source),
+        QUBOTools.quadratic_terms(source),
+        Dict{VI,Int}(VI(i) => j for (i, j) in QUBOTools.variable_map(source)),
+        Dict{Int,VI}(j => VI(i) for (j, i) in QUBOTools.variable_inv(source));
+        scale=QUBOTools.scale(source),
+        offset=QUBOTools.scale(source),
+    )
 
-    nothing
+    return sampler
+end
+
+# ~*~ File IO: MOI API ~*~ #
+function MOI.read_from_file(sampler::AutomaticSampler, filename::AbstractString)
+    return read!(filename, sampler)
+end
+
+function MOI.write_to_file(sampler::AutomaticSampler, filename::AbstractString)
+    return write(filename, sampler)
 end
