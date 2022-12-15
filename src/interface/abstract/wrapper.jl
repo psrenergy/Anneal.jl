@@ -62,3 +62,13 @@ if !hasmethod(QUBOTools.backend, (JuMP.Model,))
         return QUBOTools.backend(JuMP.unsafe_backend(model))
     end
 end
+
+function QUBOTools.Sense(sense::MOI.OptimizationSense)
+    if sense === MOI.MIN_SENSE
+        return QUBOTools.Sense(:min)
+    elseif sense === MOI.MAX_SENSE
+        return QUBOTools.Sense(:max)
+    else
+        error("Invalid sense for QUBO: '$sense'")
+    end
+end

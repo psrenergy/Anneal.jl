@@ -160,17 +160,17 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     flag = false
 
     if !__is_quadratic(model)
-        @warn "The given model's objective function is not a quadratic or linear polynomial"
+        @error "The given model's objective function is not a quadratic or linear polynomial"
         flag = true
     end
 
     if !__is_optimization(model)
-        @warn "The given model lacks an optimization sense"
+        @error "The given model lacks an optimization sense"
         flag = true
     end
 
     if !__is_unconstrained(model)
-        @warn "The given model is not unconstrained"
+        @error "The given model is not unconstrained"
         flag = true
     end
 
@@ -224,19 +224,16 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
 
     # ~*~ Retrieve Model ~*~ #
     L, Q, offset = __extract_qubo_model(T, Ω, model, D())
+    scale        = one(T)
 
     # ~*~ Objective Sense ~*~ #
-    sense = MOI.get(model, MOI.ObjectiveSense())
-    scale = one(T) # ~ Assuming MIN_SENSE
-
-    # ~*~ Invert Problem Sense ~*~ #
-    if sense === MOI.MAX_SENSE
-        L = Dict{VI,T}(i => -l for (i, l) in L)
-        Q = Dict{Tuple{VI,VI},T}(ij => -q for (ij, q) in Q)
-        scale  = -scale
-        offset = -offset
-    end
+    sense = QUBOTools.Sense(MOI.get(model, MOI.ObjectiveSense()))
 
     # ~*~ Return Model ~*~ #
-    return QUBOTools.StandardQUBOModel{D,VI,T,Int}(L, Q; scale = scale, offset = offset)
+    return QUBOTools.Model{D,VI,T,Int}(
+        L, Q;
+        scale  = scale,
+        offset = offset,
+        sense  = sense,
+    )
 end

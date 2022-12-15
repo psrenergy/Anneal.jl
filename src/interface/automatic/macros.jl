@@ -176,16 +176,12 @@ function __anew_parse_params(block::Expr)
         end
     end
 
-    params[:sense] = if params[:sense] === :min
-        MOI.MIN_SENSE
-    else
-        MOI.MAX_SENSE
-    end
-
-    params[:domain] = if params[:domain] === :bool
-        QUBOTools.BoolDomain()
+    params[:sense] = QUBOTools.Sense(params[:sense])
+    
+    if params[:domain] === :bool
+        params[:domain] = QUBOTools.BoolDomain()
     elseif params[:domain] === :spin
-        QUBOTools.SpinDomain()
+        params[:domain] = QUBOTools.SpinDomain()
     end
 
     return params
@@ -335,12 +331,14 @@ macro anew(raw_args...)
 
         mutable struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
             # ~*~ QUBOTools Backend model ~*~ #
-            model::Union{QUBOTools.StandardQUBOModel,Nothing}
+            source::Union{QUBOTools.Model,Nothing}
+            target::Union{QUBOTools.Model,Nothing}
             # ~*~ Attributes ~*~ #
             attrs::Anneal.SamplerAttributeData{T}
 
             function $(esc(id)){T}(args...; kws...) where {T}
                 return new{T}(
+                    nothing,
                     nothing,
                     Anneal.SamplerAttributeData{T}(copy.(__SAMPLER_ATTRIBUTES)),
                 )

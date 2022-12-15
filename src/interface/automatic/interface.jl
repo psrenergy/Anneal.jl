@@ -4,26 +4,22 @@ abstract type AutomaticSampler{T} <: AbstractSampler{T} end
     model_sense(sampler)::Union{Symbol,Nothing}
 """ function model_sense end
 
-function Anneal.model_sense(sampler::AutomaticSampler)
-    return MOI.get(sampler, MOI.ObjectiveSense())
-end
+Anneal.model_sense(sampler::AutomaticSampler) = QUBOTools.sense(sampler.source)::QUBOTools.Sense
 
 @doc raw"""
     model_domain(sampler)::Union{Symbol,Nothing}
 """ function model_domain end
 
-function Anneal.model_domain(sampler::AutomaticSampler)
-    return QUBOTools.domain(sampler)
-end
+Anneal.model_domain(sampler::AutomaticSampler) = QUBOTools.domain(sampler.source)::QUBOTools.VariableDomain
 
 @doc raw"""
     solver_sense(sampler)::Union{Symbol,Nothing}
 """ function solver_sense end
 
-Anneal.solver_sense(::AutomaticSampler) = nothing
+Anneal.solver_sense(::S) where {S<:AutomaticSampler} = error("'solver_sense' not defined for '$S'")
 
 @doc raw"""
     solver_domain(sampler)::Union{Symbol,Nothing}
 """ function solver_domain end
 
-Anneal.solver_domain(::AutomaticSampler) = nothing
+Anneal.solver_domain(::S) where {S<:AutomaticSampler} = error("'solver_domain' not defined for '$S'")

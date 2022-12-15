@@ -1,33 +1,44 @@
 # ~*~ QUBOTools.jl ~*~ #
-QUBOTools.backend(sampler::AutomaticSampler) = sampler.model
+QUBOTools.backend(sampler::AutomaticSampler) = sampler.target
+frontend(sampler::AutomaticSampler) = sampler.source
 
-function Anneal.qubo(sampler::AutomaticSampler)
-    Q, α, β = QUBOTools.qubo(QUBOTools.backend(sampler))
+function __transpose_model(
+    model_domain::QUBOTools.VariableDomain,
+    model_sense::QUBOTools.Sense,
+    solver_sense::QUBOTools.Sense,
+    solver_domain::QUBOTools.VariableDomain,
+    model::QUBOTools.AbstractModel
+)
+    return QUBOTools.swap_sense(model_sense, solver_sense, QUBOTools.swap_domain(model_domain, solver_domain, model))
+end
 
-    if Anneal.solver_sense(sampler) !== Anneal.model_sense(sampler)
-        Q, α, β = QUBOTools.invert_sense(Q, α, β)
-    end
-
-    return (Q, α, β)
+function __transpose_model(sampler::AutomaticSampler, model::QUBOTools.AbstractModel)
+    return __transpose_model(
+        Anneal.model_domain(sampler),
+        Anneal.model_sense(sampler),
+        Anneal.solver_sense(sampler),
+        Anneal.solver_domain(sampler),
+        model,
+    )
 end
 
 # ~*~ :: MathOptInterface :: ~*~ #
 function MOI.empty!(sampler::AutomaticSampler)
-    if !isnothing(sampler.model)
-        empty!(QUBOTools.backend(sampler))
-    end
+    isnothing(sampler.source) || empty!(sampler.source)
+    isnothing(sampler.target) || empty!(sampler.target)
 
-    return nothing
+    return sampler
 end
 
 function MOI.is_empty(sampler::AutomaticSampler)
-    return isnothing(sampler.model) || isempty(QUBOTools.backend(sampler))
+    return (isnothing(sampler.source) || isempty(sampler.source)) &&
+           (isnothing(sampler.target) || isempty(sampler.target))
 end
 
 function MOI.optimize!(sampler::AutomaticSampler)
     Anneal.sample!(sampler)
 
-    nothing
+    return nothing
 end
 
 function MOI.optimize!(sampler::AutomaticSampler, model::MOI.ModelLike)
@@ -39,7 +50,8 @@ function MOI.optimize!(sampler::AutomaticSampler, model::MOI.ModelLike)
 end
 
 function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {T}
-    sampler.model = Anneal.parse_qubo_model(T, model)::QUBOTools.StandardQUBOModel
+    sampler.source = Anneal.parse_qubo_model(T, model)::QUBOTools.Model
+    sampler.target = __transpose_model(sampler, sampler.source)
 
     return MOIU.identity_index_map(model)
 end
@@ -57,11 +69,11 @@ function Base.show(io::IO, sampler::AutomaticSampler)
 end
 
 function MOI.get(sampler::AutomaticSampler, ps::MOI.PrimalStatus, ::VI)
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    sampleset = QUBOTools.sampleset(frontend(sampler))
 
     ri = ps.result_index
 
-    if isnothing(sampleset) || !(1 <= ri <= length(sampleset))
+    if !(1 <= ri <= length(sampleset))
         return MOI.NO_SOLUTION
     else
         # ~ This status is also not very accurate, but
@@ -72,11 +84,11 @@ function MOI.get(sampler::AutomaticSampler, ps::MOI.PrimalStatus, ::VI)
 end
 
 function MOI.get(sampler::AutomaticSampler, ds::MOI.DualStatus, ::VI)
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    sampleset = QUBOTools.sampleset(frontend(sampler))
 
     ri = ds.result_index
 
-    if isnothing(sampleset) || !(1 <= ri <= length(sampleset))
+    if !(1 <= ri <= length(sampleset))
         return MOI.NO_SOLUTION
     else
         # ~ This status is also not very accurate. Yes,
@@ -87,25 +99,23 @@ function MOI.get(sampler::AutomaticSampler, ds::MOI.DualStatus, ::VI)
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.RawStatusString)
-    sampleset = QUBOTools.sampleset(sampler)::Union{SampleSet,Nothing}
-
-    if isnothing(sampleset) || !haskey(sampleset.metadata, "status")
+    metadata = QUBOTools.metadata(QUBOTools.sampleset(frontend(sampler)))::Dict{String,Any}
+    
+    if !haskey(metadata, "status")
         return ""
     else
-        return sampleset.metadata["status"]::String
+        return metadata["status"]::String
     end
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.ResultCount)
-    sampleset = QUBOTools.sampleset(sampler)
-
-    return length(sampleset)
+    return length(QUBOTools.sampleset(frontend(sampler)))
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.TerminationStatus)
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    sampleset = QUBOTools.sampleset(frontend(sampler))
 
-    if isnothing(sampleset) || isempty(sampleset)
+    if isempty(sampleset)
         return MOI.OPTIMIZE_NOT_CALLED
     else
         # ~ This one is a little bit tricky.
@@ -116,10 +126,9 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.TerminationStatus)
 end
 
 function MOI.get(sampler::AutomaticSampler{T}, ::MOI.ObjectiveSense) where {T}
-    # ~ It is assumed that our backend represents a minimization problem
-    #   by default.
-    # ~ Scaling it with a negative value makes it a maximixation one.
-    if QUBOTools.scale(sampler) >= zero(T)
+    sense = QUBOTools.sense(frontend(sampler))
+
+    if sense === QUBOTools.Min
         return MOI.MIN_SENSE
     else
         return MOI.MAX_SENSE
@@ -127,11 +136,11 @@ function MOI.get(sampler::AutomaticSampler{T}, ::MOI.ObjectiveSense) where {T}
 end
 
 function MOI.get(sampler::AutomaticSampler, ov::MOI.ObjectiveValue)
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    sampleset = QUBOTools.sampleset(frontend(sampler))
 
     ri = ov.result_index
 
-    if isnothing(sampleset) || isempty(sampleset)
+    if isempty(sampleset)
         error("Invalid result index '$ri'; There are no solutions")
     elseif !(1 <= ri <= length(sampleset))
         error("Invalid result index '$ri'; There are $(length(sampleset)) solutions")
@@ -141,16 +150,16 @@ function MOI.get(sampler::AutomaticSampler, ov::MOI.ObjectiveValue)
         ri = length(sampleset) - ri + 1
     end
 
-    return sampleset[ri].value
+    return QUBOTools.value(sampleset, ri)
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.SolveTimeSec)
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    metadata = QUBOTools.metadata(QUBOTools.sampleset(frontend(sampler)))
 
-    if isnothing(sampleset) || !haskey(sampleset.metadata, "time")
+    if !haskey(metadata, "time")
         return NaN
     else
-        time_data = sampleset.metadata["time"]
+        time_data = metadata["time"]
 
         if haskey(time_data, "sample")
             return time_data["sample"]::Float64
@@ -163,17 +172,17 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.SolveTimeSec)
 end
 
 function MOI.get(sampler::AutomaticSampler{T}, vp::MOI.VariablePrimal, vi::VI) where {T}
-    sampleset = QUBOTools.sampleset(sampler)::SampleSet
+    sampleset = QUBOTools.sampleset(frontend(sampler))
 
     ri = vp.result_index
 
-    if isnothing(sampleset) || isempty(sampleset)
+    if isempty(sampleset)
         error("Invalid result index '$ri'; There are no solutions")
     elseif !(1 <= ri <= length(sampleset))
         error("Invalid result index '$ri'; There are $(length(sampleset)) solutions")
     end
 
-    variable_map = QUBOTools.variable_map(sampler)
+    variable_map = QUBOTools.variable_map(frontend(sampler))
 
     if !haskey(variable_map, vi)
         error("Variable index '$vi' not in model")
@@ -183,44 +192,23 @@ function MOI.get(sampler::AutomaticSampler{T}, vp::MOI.VariablePrimal, vi::VI) w
         ri = length(sampleset) - ri + 1
     end
 
-    value = sampleset[ri].state[variable_map[vi]]
+    value = QUBOTools.state(sampleset, ri, variable_map[vi])
 
     return convert(T, value)
 end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.NumberOfVariables)
-    return QUBOTools.domain_size(sampler)
+    return QUBOTools.domain_size(frontend(sampler))
 end
 
 # ~*~ File IO: Base API ~*~ #
-function Base.write(filename::AbstractString, sampler::AutomaticSampler)
-    return write(
-        filename,
-        convert(QUBOTools.infer_model_type(filename), QUBOTools.backend(sampler)),
-    )
+function Base.write(filename::AbstractString, sampler::AutomaticSampler, fmt::QUBOTools.AbstractFormat = QUBOTools.infer_format(filename))
+    return QUBOTools.write_model(filename, frontend(sampler), fmt)
 end
 
-function Base.read!(filename::AbstractString, sampler::AutomaticSampler{T}) where {T}
-    source = read(filename, QUBOTools.infer_model_type(filename))
-    domain = QUBOTools.domain(source)
-
-    sampler.model = QUBOTools.StandardQUBOModel{VI,Int,T,domain}(
-        QUBOTools.linear_terms(source),
-        QUBOTools.quadratic_terms(source),
-        Dict{VI,Int}(VI(i) => j for (i, j) in QUBOTools.variable_map(source)),
-        Dict{Int,VI}(j => VI(i) for (j, i) in QUBOTools.variable_inv(source));
-        scale=QUBOTools.scale(source),
-        offset=QUBOTools.scale(source),
-    )
+function Base.read!(filename::AbstractString, sampler::AutomaticSampler, fmt::QUBOTools.AbstractFormat = QUBOTools.infer_format(filename))
+    sampler.source = QUBOTools.read_model(filename, fmt)
+    sampler.target = __transpose_model(sampler, sampler.source)
 
     return sampler
-end
-
-# ~*~ File IO: MOI API ~*~ #
-function MOI.read_from_file(sampler::AutomaticSampler, filename::AbstractString)
-    return read!(filename, sampler)
-end
-
-function MOI.write_to_file(sampler::AutomaticSampler, filename::AbstractString)
-    return write(filename, sampler)
 end
