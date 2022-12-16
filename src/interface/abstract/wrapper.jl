@@ -53,13 +53,13 @@ function QUBOTools.reads(model::JuMP.Model; result::Integer = 1)
 end
 
 # ~ Give access to QUBOTools' queries.
+# Other packages, such as ToQUBO.jl, also would like to apply 
+# this extesion to connect JuMP and QUBOTools.
+# ToQUBO.jl and Anneal.jl share many use cases, but are inde-
+# pendent in a conceptual sense.
 if !hasmethod(QUBOTools.backend, (JuMP.Model,))
-    # Other packages, such as ToQUBO.jl, also would like to apply 
-    # this extesion to connect JuMP and QUBOTools.
-    # ToQUBO.jl and Anneal.jl share many use cases, but are inde-
-    # pendent in a conceptual sense.
     function QUBOTools.backend(model::JuMP.Model)
-        return QUBOTools.backend(JuMP.unsafe_backend(model))
+        return QUBOTools.frontend(JuMP.unsafe_backend(model))
     end
 end
 

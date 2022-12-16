@@ -1,6 +1,6 @@
 # ~*~ QUBOTools.jl ~*~ #
-QUBOTools.backend(sampler::AutomaticSampler) = sampler.target
-frontend(sampler::AutomaticSampler) = sampler.source
+QUBOTools.backend(sampler::AutomaticSampler)  = sampler.target
+QUBOTools.frontend(sampler::AutomaticSampler) = sampler.source
 
 function __transpose_model(
     model_domain::QUBOTools.VariableDomain,

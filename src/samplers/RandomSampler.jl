@@ -63,7 +63,7 @@ function random_sample(
     for i = 1:m
         ψ = rand(rng, (0, 1), n)
 
-        samples[i] = Sample{T,Int}(ψ, α * (Anneal.energy(Q, ψ) + β))
+        samples[i] = Sample{T,Int}(ψ, α * (Anneal.value(Q, ψ) + β))
     end
 
     return samples

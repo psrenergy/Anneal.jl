@@ -1,46 +1,36 @@
-function parse_results(::AutomaticSampler, ::S) where {S}
-    throw(Anneal.SampleError("Invalid results of type '$S'"))
-end
-
-function parse_results(
-    sampler::AutomaticSampler{T},
-    results::Anneal.SampleSet{T,U},
-) where {T,U}
-    results = QUBOTools.swap_domain(
-        Anneal.solver_domain(sampler),
-        Anneal.model_domain(sampler),
-        results
-    )
-
-    results = QUBOTools.swap_sense(
-        Anneal.solver_sense(sampler),
-        Anneal.model_sense(sampler),
-        results
-    )
-
-    return results
-end
-
-function Anneal.sample!(sampler::AutomaticSampler)
-    # ~*~ Run Sampling ~*~ # 
-    results   = @timed Anneal.sample(sampler)
-    sampleset = Anneal.parse_results(sampler, results.value)
+function _parse_results(results)
+    sampleset  = results.value
+    total_time = results.time
 
     # ~*~ Timing Information ~*~ #
-    timedata = Dict{String,Any}("total" => results.time)
     metadata = QUBOTools.metadata(sampleset)
+    timedata = Dict{String,Any}("total" => total_time)
 
-    # ~*~ Time metadata ~*~ #
     if !haskey(metadata, "time")
         metadata["time"] = timedata
     elseif !haskey(sampleset.metadata["time"], "total")
         metadata["time"]["total"] = timedata["total"]
     end
 
-    # ~*~ Update sampleset ~*~ #
-    model = frontend(sampler)::QUBOTools.Model
+    return sampleset
+end
 
-    copy!(QUBOTools.sampleset(model), sampleset)
+function Anneal.sample!(sampler::AutomaticSampler)
+    # ~*~ Run Sampling ~*~ # 
+    results = @timed Anneal.sample(sampler)
+
+    target_results = _parse_results(results)
+    source_results = QUBOTools.format(
+        QUBOTools.sense(backend(sampler)),
+        QUBOTools.domain(backend(sampler)),
+        QUBOTools.sense(frontend(sampler)),
+        QUBOTools.domain(frontend(sampler)),
+        target_results,
+    )
+
+    # ~*~ Update sampleset ~*~ #
+    copy!(sampleset(backend(sampler)), target_results)
+    copy!(sampleset(frontend(sampler)), source_results)
 
     return nothing
 end
