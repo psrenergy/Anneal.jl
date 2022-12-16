@@ -3,6 +3,7 @@ module Anneal
 # ~*~ Imports: JuMP + MathOptInterface ~*~ #
 import JuMP
 import MathOptInterface
+
 const MOI = MathOptInterface
 const MOIU = MOI.Utilities
 const SQF{T} = MOI.ScalarQuadraticFunction{T}
@@ -16,14 +17,14 @@ const CI = MOI.ConstraintIndex
 export MOI
 
 # ~*~ Imports: QUBOTools Backend ~*~ # 
-import QUBOTools: QUBOTools, SampleSet, Sample, backend
-import QUBOTools: ising, qubo, energy, adjacency, reads
+import QUBOTools: QUBOTools, SampleSet, Sample, backend, frontend
+import QUBOTools: ising, qubo, adjacency, reads, state, value
 import QUBOTools: sampleset, variables, indices
 import QUBOTools: ↑, ↓
 
 # ~*~ Expots: QUBOTools Backend ~*~ #
-export QUBOTools, SampleSet, Sample, backend
-export ising, qubo, energy, adjacency, reads
+export QUBOTools, SampleSet, Sample
+export ising, qubo, adjacency, reads, state, value
 export sampleset, variables, indices
 export ↑, ↓
 

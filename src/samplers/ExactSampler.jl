@@ -45,7 +45,7 @@ function exact_sample(Q::Dict{Tuple{Int,Int},T}, α::T, β::T, n::Integer) where
     for i = 1:m
         ψ = sample_state(i, n)
 
-        samples[i] = Anneal.Sample{T,Int}(ψ, α * (Anneal.energy(Q, ψ) + β))
+        samples[i] = Anneal.Sample{T,Int}(ψ, α * (Anneal.value(Q, ψ) + β))
     end
 
     return samples
