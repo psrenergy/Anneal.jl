@@ -2,26 +2,6 @@
 QUBOTools.backend(sampler::AutomaticSampler)  = sampler.target
 QUBOTools.frontend(sampler::AutomaticSampler) = sampler.source
 
-function __transpose_model(
-    model_domain::QUBOTools.VariableDomain,
-    model_sense::QUBOTools.Sense,
-    solver_sense::QUBOTools.Sense,
-    solver_domain::QUBOTools.VariableDomain,
-    model::QUBOTools.AbstractModel
-)
-    return QUBOTools.swap_sense(model_sense, solver_sense, QUBOTools.swap_domain(model_domain, solver_domain, model))
-end
-
-function __transpose_model(sampler::AutomaticSampler, model::QUBOTools.AbstractModel)
-    return __transpose_model(
-        Anneal.model_domain(sampler),
-        Anneal.model_sense(sampler),
-        Anneal.solver_sense(sampler),
-        Anneal.solver_domain(sampler),
-        model,
-    )
-end
-
 # ~*~ :: MathOptInterface :: ~*~ #
 function MOI.empty!(sampler::AutomaticSampler)
     isnothing(sampler.source) || empty!(sampler.source)
@@ -51,7 +31,13 @@ end
 
 function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {T}
     sampler.source = Anneal.parse_qubo_model(T, model)::QUBOTools.Model
-    sampler.target = __transpose_model(sampler, sampler.source)
+    sampler.target = QUBOTools.format(
+        Anneal.model_sense(sampler),
+        Anneal.model_domain(sampler),
+        Anneal.solver_sense(sampler),
+        Anneal.solver_domain(sampler),
+        sampler.source
+    )
 
     return MOIU.identity_index_map(model)
 end
