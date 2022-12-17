@@ -1,13 +1,8 @@
 # ~*~ :: MathOptInterface Attributes :: ~*~ ::
-const MOI_ATTRIBUTES = Union{
-    MOI.Name,
-    MOI.Silent,
-    MOI.TimeLimitSec,
-    MOI.NumberOfThreads,
-    # MOI.VariablePrimalStart,
-}
+const _MOI_ATTRIBUTES =
+    Union{MOI.Name,MOI.Silent,MOI.TimeLimitSec,MOI.NumberOfThreads,MOI.VariablePrimalStart}
 
-mutable struct MOIAttributeData{T}
+mutable struct _MOIAttributeData{T}
     # ~*~ Regular ~*~
     name::String
     silent::Bool
@@ -16,15 +11,14 @@ mutable struct MOIAttributeData{T}
     # ~*~ Extra ~*~
     variable_primal_start::Dict{VI,T}
 
-    function MOIAttributeData{T}(;
-        name::String="",
-        silent::Bool=false,
-        time_limit_sec::Union{Float64,Nothing}=nothing,
-        number_of_threads::Integer=Threads.nthreads(),
-        variable_primal_start=Dict{VI,T}()
+    function _MOIAttributeData{T}(;
+        name::String                           = "",
+        silent::Bool                           = false,
+        time_limit_sec::Union{Float64,Nothing} = nothing,
+        number_of_threads::Integer             = Threads.nthreads(),
+        variable_primal_start                  = Dict{VI,T}(),
     ) where {T}
-
-        new{T}(
+        return new{T}(
             name,
             silent,
             time_limit_sec,
@@ -32,52 +26,81 @@ mutable struct MOIAttributeData{T}
             variable_primal_start,
         )
     end
-
-    function MOIAttributeData(; kws...)
-        MOIAttributeData{Float64}(; kws...)
-    end
 end
 
 # ~*~ :: get :: ~*~ ::
-function Base.getindex(::MOIAttributeData, ::X) where {X<:MOI.AbstractOptimizerAttribute}
+function MOI.get(::_MOIAttributeData, ::X) where {X<:MOI.AbstractOptimizerAttribute}
     error("Attribute '$X' is not supported")
 end
 
-Base.getindex(moiattrs::MOIAttributeData, ::MOI.Name) = moiattrs.name
-Base.getindex(moiattrs::MOIAttributeData, ::MOI.Silent) = moiattrs.silent
-Base.getindex(moiattrs::MOIAttributeData, ::MOI.TimeLimitSec) = moiattrs.time_limit_sec
-Base.getindex(moiattrs::MOIAttributeData, ::MOI.NumberOfThreads) = moiattrs.number_of_threads
+MOI.get(data::_MOIAttributeData, ::MOI.Name)            = data.name
+MOI.get(data::_MOIAttributeData, ::MOI.Silent)          = data.silent
+MOI.get(data::_MOIAttributeData, ::MOI.TimeLimitSec)    = data.time_limit_sec
+MOI.get(data::_MOIAttributeData, ::MOI.NumberOfThreads) = data.number_of_threads
 
-function Base.getindex(moiattrs::MOIAttributeData{T}, ::MOI.VariablePrimalStart, vi::VI) where {T}
-    if haskey(moiattrs.variable_primal_start, vi)
-        return moiattrs.variable_primal_start[vi]
-    else
-        error("No warm-start value for '$vi'")
-    end
+function MOI.get(data::_MOIAttributeData, ::MOI.VariablePrimalStart, vi::VI)
+    return get(data.variable_primal_start, vi, nothing)
 end
 
 # ~*~ :: set :: ~*~ ::
-Base.setindex!(moiattrs::MOIAttributeData, name::String, ::MOI.Name) = (moiattrs.name = name)
-Base.setindex!(moiattrs::MOIAttributeData, silent::Bool, ::MOI.Silent) = (moiattrs.silent = silent)
+function MOI.set(data::_MOIAttributeData, ::MOI.Name, name::String)
+    data.name = name
 
-function Base.setindex!(moiattrs::MOIAttributeData, time_limit_sec::Union{Float64,Nothing}, ::MOI.TimeLimitSec)
+    return nothing
+end
+
+function MOI.set(data::_MOIAttributeData, ::MOI.Silent, silent::Bool)
+    data.silent = silent
+
+    return nothing
+end
+
+function MOI.set(
+    data::_MOIAttributeData,
+    ::MOI.TimeLimitSec,
+    time_limit_sec::Union{Float64,Nothing},
+)
     @assert isnothing(time_limit_sec) || time_limit_sec >= 0.0
 
-    moiattrs.time_limit_sec = time_limit_sec
+    data.time_limit_sec = time_limit_sec
+
+    return nothing
 end
 
-function Base.setindex!(moiattrs::MOIAttributeData, number_of_threads::Integer, ::MOI.NumberOfThreads)
+function MOI.set(data::_MOIAttributeData, ::MOI.NumberOfThreads, number_of_threads::Integer)
     @assert number_of_threads > 0
 
-    moiattrs.number_of_threads = number_of_threads
+    data.number_of_threads = number_of_threads
+
+    return nothing
 end
 
-function Base.setindex!(moiattrs::MOIAttributeData{T}, value::T, ::MOI.VariablePrimalStart, vi::VI) where {T}
-    moiattrs.variable_primal_start[vi] = value
+function MOI.set(
+    data::_MOIAttributeData{T},
+    ::MOI.VariablePrimalStart,
+    vi::VI,
+    value::T,
+) where {T}
+    data.variable_primal_start[vi] = value
+
+    return nothing
+end
+
+function MOI.set(
+    data::_MOIAttributeData{T},
+    ::MOI.VariablePrimalStart,
+    vi::VI,
+    ::Nothing,
+) where {T}
+    delete!(data.variable_primal_start, vi)
+
+    return nothing
 end
 
 # ~*~ :: Sampler Attributes :: ~*~ ::
 abstract type AbstractSamplerAttribute <: MOI.AbstractOptimizerAttribute end
+
+const _SAMPLER_ATTRIBUTES = Union{_MOI_ATTRIBUTES,<:AbstractSamplerAttribute}
 
 mutable struct SamplerAttribute{T<:Any}
     value::T
@@ -86,36 +109,30 @@ mutable struct SamplerAttribute{T<:Any}
 
     function SamplerAttribute{T}(
         default::T;
-        rawattr::Union{String,Nothing}=nothing,
-        optattr::Union{<:AbstractSamplerAttribute,Nothing}=nothing
+        rawattr::Union{String,Nothing}                     = nothing,
+        optattr::Union{<:AbstractSamplerAttribute,Nothing} = nothing,
     ) where {T}
-        @assert !isnothing(rawattr) || !isnothing(optattr)
+        @assert !(isnothing(rawattr) && isnothing(optattr))
 
-        new{T}(default, rawattr, optattr)
-    end
-
-    function SamplerAttribute(args...)
-        SamplerAttribute{Any}(args...)
+        return new{T}(default, rawattr, optattr)
     end
 end
+
+SamplerAttribute(args...) = SamplerAttribute{Any}(args...)
 
 function Base.copy(attr::SamplerAttribute{T}) where {T}
-    SamplerAttribute{T}(
-        attr.value;
-        rawattr=attr.rawattr,
-        optattr=attr.optattr
-    )
+    return SamplerAttribute{T}(attr.value; rawattr = attr.rawattr, optattr = attr.optattr)
 end
 
-struct SamplerAttributeData{T}
+struct _SamplerAttributeData{T}
     rawattrs::Dict{String,SamplerAttribute}
     optattrs::Dict{AbstractSamplerAttribute,SamplerAttribute}
-    moiattrs::MOIAttributeData{T}
+    moiattrs::_MOIAttributeData{T}
 
-    function SamplerAttributeData{T}(attrs::Vector) where {T}
+    function _SamplerAttributeData{T}(attrs::Vector) where {T}
         rawattrs = Dict{String,SamplerAttribute}()
         optattrs = Dict{AbstractSamplerAttribute,SamplerAttribute}()
-        moiattrs = MOIAttributeData{T}()
+        moiattrs = _MOIAttributeData{T}()
 
         for attr::SamplerAttribute in attrs
             if !isnothing(attr.rawattr)
@@ -127,80 +144,72 @@ struct SamplerAttributeData{T}
             end
         end
 
-        new{T}(rawattrs, optattrs, moiattrs)
+        return new{T}(rawattrs, optattrs, moiattrs)
     end
 end
 
 # ~*~ :: get :: ~*~ ::
-function Base.getindex(attrs::SamplerAttributeData, attr::MOI_ATTRIBUTES, args...)
-    return attrs.moiattrs[attr, args...]
+function MOI.get(data::_SamplerAttributeData, attr::_MOI_ATTRIBUTES, args...)
+    return MOI.get(data.moiattrs, attr, args...)
 end
 
-function Base.getindex(attrs::SamplerAttributeData, attr::AbstractSamplerAttribute)
-    if haskey(attrs.optattrs, attr)
-        data = attrs.optattrs[attr]
-
-        return data.value
+function MOI.get(data::_SamplerAttributeData, attr::AbstractSamplerAttribute)
+    if haskey(data.optattrs, attr)
+        return data.optattrs[attr].value
     else
         error("Attribute '$attr' is not supported")
     end
 end
 
-function Base.getindex(attrs::SamplerAttributeData, raw_attr::String)
-    if haskey(attrs.rawattrs, raw_attr)
-        data = attrs.rawattrs[raw_attr]
-
-        return data.value
+function MOI.get(data::_SamplerAttributeData, raw_attr::String)
+    if haskey(data.rawattrs, raw_attr)
+        return data.rawattrs[raw_attr].value
     else
         error("Attribute '$raw_attr' is not supported")
     end
 end
 
-function MOI.get(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES,AbstractSamplerAttribute})
-    return sampler.attrs[attr]
+function MOI.get(sampler::AutomaticSampler, attr::_SAMPLER_ATTRIBUTES)
+    return MOI.get(sampler.attrs, attr)
 end
 
 function MOI.get(sampler::AutomaticSampler, attr::MOI.VariablePrimalStart, vi::VI)
-    return sampler.attrs[attr, vi]
+    return MOI.get(sampler.attrs, attr, vi)
 end
 
 function MOI.get(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute)
-    return sampler.attrs[attr.name]
+    return MOI.get(sampler.attrs, attr.name)
 end
 
 # ~*~ :: set :: ~*~ ::
-function Base.setindex!(attrs::SamplerAttributeData, value, attr::MOI_ATTRIBUTES, args...)
-    attrs.moiattrs[attr, args...] = value
+function MOI.set(data::_SamplerAttributeData, attr::_MOI_ATTRIBUTES, args...)
+    MOI.set(data.moiattrs, attr, args...)
 end
 
-function Base.setindex!(attrs::SamplerAttributeData, value, attr::AbstractSamplerAttribute)
-    if haskey(attrs.optattrs, attr)
-        data = attrs.optattrs[attr]
-
-        data.value = value
+function MOI.set(data::_SamplerAttributeData, attr::AbstractSamplerAttribute, value)
+    if haskey(data.optattrs, attr)
+        data.optattrs[attr].value = value
     else
         error("Attribute '$attr' is not supported")
     end
 end
 
-function Base.setindex!(attrs::SamplerAttributeData, value, raw_attr::String)
-    if haskey(attrs.rawattrs, raw_attr)
-        data = attrs.rawattrs[raw_attr]
-
-        data.value = value
+function MOI.set(data::_SamplerAttributeData, raw_attr::String, value)
+    if haskey(data.rawattrs, raw_attr)
+        data.rawattrs[raw_attr].value = value
     else
         error("Attribute '$raw_attr' is not supported")
     end
 end
 
-function MOI.set(sampler::AutomaticSampler, attr::Union{MOI_ATTRIBUTES,AbstractSamplerAttribute}, value)
-    sampler.attrs[attr] = value
+function MOI.set(sampler::AutomaticSampler, attr::_SAMPLER_ATTRIBUTES, value)
+    MOI.set(sampler.attrs, attr, value)
 end
 
 function MOI.set(sampler::AutomaticSampler, attr::MOI.VariablePrimalStart, vi::VI, value)
-    sampler.attrs[attr, vi] = value
+    MOI.set(sampler.attrs, attr, vi, value)
 end
 
 function MOI.set(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute, value)
-    sampler.attrs[attr.name] = value
+    MOI.set(sampler.attrs, attr.name, value)
 end

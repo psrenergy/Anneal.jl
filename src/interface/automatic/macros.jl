@@ -1,10 +1,10 @@
 const __ANEW_REGISTRY = Set{Module}()
 
 const __ANEW_DEFAULT_PARAMS() = Dict{Symbol,Any}(
-    :name => "Binary Quadratic Sampler",
-    :sense => :min,
-    :domain => :bool,
-    :version => v"1.0.0",
+    :name       => "QUBO Sampler",
+    :sense      => :min,
+    :domain     => :bool,
+    :version    => v"1.0.0",
     :attributes => Dict{Symbol,Any}[],
 )
 
@@ -334,13 +334,15 @@ macro anew(raw_args...)
             source::Union{QUBOTools.Model,Nothing}
             target::Union{QUBOTools.Model,Nothing}
             # ~*~ Attributes ~*~ #
-            attrs::Anneal.SamplerAttributeData{T}
+            attrs::Anneal._SamplerAttributeData{T}
 
             function $(esc(id)){T}(args...; kws...) where {T}
                 return new{T}(
                     nothing,
                     nothing,
-                    Anneal.SamplerAttributeData{T}(copy.(__SAMPLER_ATTRIBUTES)),
+                    Anneal._SamplerAttributeData{T}(
+                        copy.(__SAMPLER_ATTRIBUTES)
+                    ),
                 )
             end
         end

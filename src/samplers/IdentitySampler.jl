@@ -1,6 +1,6 @@
 module IdentitySampler
 
-import Anneal
+using Anneal
 using MathOptInterface
 const MOI = MathOptInterface
 
@@ -15,7 +15,7 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     n = MOI.get(sampler, MOI.NumberOfVariables())
 
     # ~*~ Retrieve warm-start state ~*~ #
-    result = sample_state(sampler, n)
+    result = @timed sample_state(sampler, n)
     states = [result.value]
 
     # ~*~ Timing Information ~*~ #
@@ -34,9 +34,20 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
 end
 
 function sample_state(sampler::Optimizer, n::Integer)
-    v = MOI.VariableIndex[QUBOTools.variable_inv(sampler, i) for i = 1:n]
+    s = Vector{MOI.VariableIndex}(undef, n)
 
-    return MOI.get.(sampler, MOI.VariablePrimalStart(), v)
+    for i = 1:n
+        v = QUBOTools.variable_inv(sampler, i)
+        x = MOI.get(sampler, MOI.VariablePrimalStart(), v)
+
+        if isnothing(x)
+            error("Missing warm-start value for state variable '$v'")
+        else
+            s[i] = x
+        end
+    end
+
+    return s
 end
 
 end # module

@@ -1,5 +1,6 @@
 using Test
 using Anneal
+using JuMP
 
 using MathOptInterface
 const MOI = MathOptInterface

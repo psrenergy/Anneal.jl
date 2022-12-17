@@ -4,15 +4,14 @@ QUBOTools.frontend(sampler::AutomaticSampler) = sampler.source
 
 # ~*~ :: MathOptInterface :: ~*~ #
 function MOI.empty!(sampler::AutomaticSampler)
-    isnothing(sampler.source) || empty!(sampler.source)
-    isnothing(sampler.target) || empty!(sampler.target)
+    sampler.source = nothing
+    sampler.target = nothing
 
     return sampler
 end
 
 function MOI.is_empty(sampler::AutomaticSampler)
-    return (isnothing(sampler.source) || isempty(sampler.source)) &&
-           (isnothing(sampler.target) || isempty(sampler.target))
+    return isnothing(sampler.source) && isnothing(sampler.target)
 end
 
 function MOI.optimize!(sampler::AutomaticSampler)
@@ -21,15 +20,9 @@ function MOI.optimize!(sampler::AutomaticSampler)
     return nothing
 end
 
-function MOI.optimize!(sampler::AutomaticSampler, model::MOI.ModelLike)
-    index_map = MOI.copy_to(sampler, model)
-
-    MOI.optimize!(sampler)
-
-    return (index_map, false)
-end
-
 function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {T}
+    MOI.empty!(sampler)
+
     sampler.source = Anneal.parse_qubo_model(T, model)::QUBOTools.Model
     sampler.target = QUBOTools.format(
         Anneal.model_sense(sampler),
@@ -37,7 +30,7 @@ function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {
         Anneal.solver_sense(sampler),
         Anneal.solver_domain(sampler),
         sampler.source
-    )
+    )::QUBOTools.Model
 
     return MOIU.identity_index_map(model)
 end
@@ -198,3 +191,9 @@ function Base.read!(filename::AbstractString, sampler::AutomaticSampler, fmt::QU
 
     return sampler
 end
+
+MOI.supports(
+    ::AbstractSampler,
+    ::MOI.VariablePrimalStart,
+    ::MOI.VariableIndex,
+) = true

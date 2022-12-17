@@ -1,135 +1,145 @@
 function __test_basic_examples(sampler::Type{S}) where {S<:AbstractSampler}
-    n = 3
+    Test.@testset "⊚ Basic ⊚" verbose = true begin
+        n = 3
 
-    # ~ QUBO Matrix
-    Q = [
-        -1  2  2
-         2 -1  2
-         2  2 -1
-    ]
+        # ~ QUBO Matrix
+        Q = [
+            -1  2  2
+             2 -1  2
+             2  2 -1
+        ]
 
-    # ~ Boolean States
-    ↑, ↓ = 0, 1
+        # ~ Boolean States
+        ↑, ↓ = 0, 1
 
-    Test.@testset "Basic ~ Bool ~ Min" begin
-        # -*- Build Model -*- #
-        model = JuMP.Model(sampler)
-        JuMP.@variable(model, x[1:n], Bin)
-        JuMP.@objective(model, Min, x' * Q * x)
+        Test.@testset "▷ Bool ⋄ Min" begin
+            # -*- Build Model -*- #
+            model = JuMP.Model(sampler)
+            JuMP.@variable(model, x[1:n], Bin)
+            JuMP.@objective(model, Min, x' * Q * x)
 
-        # -*- Run -*- #
-        JuMP.optimize!(model)
+            Anneal.test_config!(sampler, model)
 
-        Test.@test JuMP.result_count(model) > 0
+            # -*- Run -*- #
+            JuMP.optimize!(model)
 
-        for i = 1:JuMP.result_count(model)
-            xi = JuMP.value.(x; result = i)
-            yi = JuMP.objective_value(model; result = i)
+            Test.@test JuMP.result_count(model) > 0
 
-            if xi ≈ [↑, ↑, ↓] || xi ≈ [↑, ↓, ↑] || xi ≈ [↓, ↑, ↑]
-                Test.@test yi ≈ -1.0
-            elseif xi ≈ [↑, ↑, ↑]
-                Test.@test yi ≈ 0.0
-            elseif xi ≈ [↑, ↓, ↓] || xi ≈ [↓, ↓, ↑] || xi ≈ [↓, ↑, ↓]
-                Test.@test yi ≈ 2.0
-            elseif xi ≈ [↓, ↓, ↓]
-                Test.@test yi ≈ 9.0
-            else
-                Test.@test false
+            for i = 1:JuMP.result_count(model)
+                xi = JuMP.value.(x; result = i)
+                yi = JuMP.objective_value(model; result = i)
+
+                if xi ≈ [↑, ↑, ↓] || xi ≈ [↑, ↓, ↑] || xi ≈ [↓, ↑, ↑]
+                    Test.@test yi ≈ -1.0
+                elseif xi ≈ [↑, ↑, ↑]
+                    Test.@test yi ≈ 0.0
+                elseif xi ≈ [↑, ↓, ↓] || xi ≈ [↓, ↓, ↑] || xi ≈ [↓, ↑, ↓]
+                    Test.@test yi ≈ 2.0
+                elseif xi ≈ [↓, ↓, ↓]
+                    Test.@test yi ≈ 9.0
+                else
+                    Test.@test false
+                end
             end
         end
-    end
 
-    Test.@testset "Basic ~ Bool ~ Max" begin
-        # -*- Build Model -*- #
-        model = JuMP.Model(sampler)
-        JuMP.@variable(model, x[1:n], Bin)
-        JuMP.@objective(model, Max, x' * Q * x)
+        Test.@testset "▷ Bool ⋄ Max" begin
+            # -*- Build Model -*- #
+            model = JuMP.Model(sampler)
+            JuMP.@variable(model, x[1:n], Bin)
+            JuMP.@objective(model, Max, x' * Q * x)
 
-        # -*- Run -*- #
-        JuMP.optimize!(model)
+            Anneal.test_config!(sampler, model)
 
-        Test.@test JuMP.result_count(model) > 0
+            # -*- Run -*- #
+            JuMP.optimize!(model)
 
-        for i = 1:JuMP.result_count(model)
-            xi = JuMP.value.(x; result = i)
-            yi = JuMP.objective_value(model; result = i)
+            Test.@test JuMP.result_count(model) > 0
 
-            if xi ≈ [↓, ↓, ↓]
-                Test.@test yi ≈ 9.0
-            elseif xi ≈ [↑, ↓, ↓] || xi ≈ [↓, ↓, ↑] || xi ≈ [↓, ↑, ↓]
-                Test.@test yi ≈ 2.0
-            elseif xi ≈ [↑, ↑, ↑]
-                Test.@test yi ≈ 0.0
-            elseif xi ≈ [↑, ↑, ↓] || xi ≈ [↑, ↓, ↑] || xi ≈ [↓, ↑, ↑]
-                Test.@test yi ≈ -1.0
-            else
-                Test.@test false
+            for i = 1:JuMP.result_count(model)
+                xi = JuMP.value.(x; result = i)
+                yi = JuMP.objective_value(model; result = i)
+
+                if xi ≈ [↓, ↓, ↓]
+                    Test.@test yi ≈ 9.0
+                elseif xi ≈ [↑, ↓, ↓] || xi ≈ [↓, ↓, ↑] || xi ≈ [↓, ↑, ↓]
+                    Test.@test yi ≈ 2.0
+                elseif xi ≈ [↑, ↑, ↑]
+                    Test.@test yi ≈ 0.0
+                elseif xi ≈ [↑, ↑, ↓] || xi ≈ [↑, ↓, ↑] || xi ≈ [↓, ↑, ↑]
+                    Test.@test yi ≈ -1.0
+                else
+                    Test.@test false
+                end
             end
         end
-    end
 
-    # ~ Ising Hamiltonian
-    J = [0 4 4; 0 0 4; 0 0 0]
-    h = [-1; -1; -1]
+        # ~ Ising Hamiltonian
+        J = [0 4 4; 0 0 4; 0 0 0]
+        h = [-1; -1; -1]
 
-    # ~ Spin states
-    ↑, ↓ = -1, 1
+        # ~ Spin states
+        ↑, ↓ = -1, 1
 
-    Test.@testset "Basic ~ Spin ~ Min" begin
-        # -*- Build Model -*- #
-        model = JuMP.Model(sampler)
-        JuMP.@variable(model, s[1:n], Anneal.Spin)
-        JuMP.@objective(model, Min, s' * J * s + h' * s)
+        Test.@testset "▷ Spin ⋄ Min" begin
+            # -*- Build Model -*- #
+            model = JuMP.Model(sampler)
+            JuMP.@variable(model, s[1:n], Anneal.Spin)
+            JuMP.@objective(model, Min, s' * J * s + h' * s)
 
-        # -*- Run -*- #
-        JuMP.optimize!(model)
+            Anneal.test_config!(sampler, model)
 
-        Test.@test JuMP.result_count(model) > 0
+            # -*- Run -*- #
+            JuMP.optimize!(model)
 
-        for i = 1:JuMP.result_count(model)
-            si = JuMP.value.(s; result = i)
-            Hi = JuMP.objective_value(model; result = i)
+            Test.@test JuMP.result_count(model) > 0
 
-            if si ≈ [↓, ↓, ↑] || si ≈ [↓, ↑, ↓] || si ≈ [↑, ↓, ↓]
-                Test.@test Hi ≈ -5.0
-            elseif si ≈ [↑, ↑, ↓] || si ≈ [↑, ↓, ↑] || si ≈ [↓, ↑, ↑]
-                Test.@test Hi ≈ -3.0
-            elseif si ≈ [↓, ↓, ↓]
-                Test.@test Hi ≈ 9.0
-            elseif si ≈ [↑, ↑, ↑]
-                Test.@test Hi ≈ 15.0
-            else
-                Test.@test false
+            for i = 1:JuMP.result_count(model)
+                si = JuMP.value.(s; result = i)
+                Hi = JuMP.objective_value(model; result = i)
+
+                if si ≈ [↓, ↓, ↑] || si ≈ [↓, ↑, ↓] || si ≈ [↑, ↓, ↓]
+                    Test.@test Hi ≈ -5.0
+                elseif si ≈ [↑, ↑, ↓] || si ≈ [↑, ↓, ↑] || si ≈ [↓, ↑, ↑]
+                    Test.@test Hi ≈ -3.0
+                elseif si ≈ [↓, ↓, ↓]
+                    Test.@test Hi ≈ 9.0
+                elseif si ≈ [↑, ↑, ↑]
+                    Test.@test Hi ≈ 15.0
+                else
+                    Test.@test false
+                end
             end
         end
-    end
 
-    Test.@testset "Basic ~ Spin ~ Max" begin
-        # -*- Build Model -*- #
-        model = JuMP.Model(sampler)
-        JuMP.@variable(model, s[1:n], Anneal.Spin)
-        JuMP.@objective(model, Max, s' * J * s + h' * s)
+        Test.@testset "▷ Spin ⋄ Max" begin
+            # -*- Build Model -*- #
+            model = JuMP.Model(sampler)
+            JuMP.@variable(model, s[1:n], Anneal.Spin)
+            JuMP.@objective(model, Max, s' * J * s + h' * s)
 
-        # -*- Run -*- #
-        JuMP.optimize!(model)
+            Anneal.test_config!(sampler, model)
 
-        Test.@test JuMP.result_count(model) > 0
+            # -*- Run -*- #
+            JuMP.optimize!(model)
 
-        for i = 1:JuMP.result_count(model)
-            si = JuMP.value.(s; result = i)
-            Hi = JuMP.objective_value(model; result = i)
+            Test.@test JuMP.result_count(model) > 0
 
-            if si ≈ [↑, ↑, ↑]
-                Test.@test Hi ≈ 15.0
-            elseif si ≈ [↓, ↓, ↓]
-                Test.@test Hi ≈ 9.0
-            elseif si ≈ [↑, ↑, ↓] || si ≈ [↑, ↓, ↑] || si ≈ [↓, ↑, ↑]
-                Test.@test Hi ≈ -3.0
-            elseif si ≈ [↓, ↓, ↑] || si ≈ [↓, ↑, ↓] || si ≈ [↑, ↓, ↓]
-                Test.@test Hi ≈ -5.0
-            else
-                Test.@test false
+            for i = 1:JuMP.result_count(model)
+                si = JuMP.value.(s; result = i)
+                Hi = JuMP.objective_value(model; result = i)
+
+                if si ≈ [↑, ↑, ↑]
+                    Test.@test Hi ≈ 15.0
+                elseif si ≈ [↓, ↓, ↓]
+                    Test.@test Hi ≈ 9.0
+                elseif si ≈ [↑, ↑, ↓] || si ≈ [↑, ↓, ↑] || si ≈ [↓, ↑, ↑]
+                    Test.@test Hi ≈ -3.0
+                elseif si ≈ [↓, ↓, ↑] || si ≈ [↓, ↑, ↓] || si ≈ [↑, ↓, ↓]
+                    Test.@test Hi ≈ -5.0
+                else
+                    Test.@test false
+                end
             end
         end
     end
