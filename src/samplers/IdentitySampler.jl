@@ -5,8 +5,8 @@ using MathOptInterface
 const MOI = MathOptInterface
 
 Anneal.@anew Optimizer begin
-    name = "Identity Sampler"
-    sense = :min
+    name   = "Identity Sampler"
+    sense  = :min
     domain = :bool
 end
 
@@ -33,8 +33,8 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     return Anneal.SampleSet{T}(sampler, states, metadata)
 end
 
-function sample_state(sampler::Optimizer, n::Integer)
-    s = Vector{MOI.VariableIndex}(undef, n)
+function sample_state(sampler::Optimizer{T}, n::Integer) where {T}
+    ψ = Vector{Int}(undef, n)
 
     for i = 1:n
         v = QUBOTools.variable_inv(sampler, i)
@@ -43,11 +43,11 @@ function sample_state(sampler::Optimizer, n::Integer)
         if isnothing(x)
             error("Missing warm-start value for state variable '$v'")
         else
-            s[i] = x
+            ψ[i] = round(Int, x)
         end
     end
 
-    return s
+    return ψ
 end
 
 end # module

@@ -184,6 +184,8 @@ end
 # ~*~ :: set :: ~*~ ::
 function MOI.set(data::_SamplerAttributeData, attr::_MOI_ATTRIBUTES, args...)
     MOI.set(data.moiattrs, attr, args...)
+
+    return nothing
 end
 
 function MOI.set(data::_SamplerAttributeData, attr::AbstractSamplerAttribute, value)
@@ -192,6 +194,8 @@ function MOI.set(data::_SamplerAttributeData, attr::AbstractSamplerAttribute, va
     else
         error("Attribute '$attr' is not supported")
     end
+
+    return nothing
 end
 
 function MOI.set(data::_SamplerAttributeData, raw_attr::String, value)
@@ -200,16 +204,37 @@ function MOI.set(data::_SamplerAttributeData, raw_attr::String, value)
     else
         error("Attribute '$raw_attr' is not supported")
     end
+
+    return nothing
 end
 
 function MOI.set(sampler::AutomaticSampler, attr::_SAMPLER_ATTRIBUTES, value)
     MOI.set(sampler.attrs, attr, value)
+
+    return nothing
 end
 
-function MOI.set(sampler::AutomaticSampler, attr::MOI.VariablePrimalStart, vi::VI, value)
+function MOI.set(
+    sampler::AutomaticSampler{T},
+    attr::MOI.VariablePrimalStart,
+    vi::VI,
+    value::Union{T,Nothing},
+) where {T}
     MOI.set(sampler.attrs, attr, vi, value)
+
+    return nothing
 end
 
 function MOI.set(sampler::AutomaticSampler, attr::MOI.RawOptimizerAttribute, value)
     MOI.set(sampler.attrs, attr.name, value)
+
+    return nothing
+end
+
+function MOI.supports(
+    ::AutomaticSampler,
+    ::MOI.VariablePrimalStart,
+    ::Type{MOI.VariableIndex},
+)
+    return true
 end

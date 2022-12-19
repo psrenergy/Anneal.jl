@@ -23,6 +23,13 @@ end
 function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {T}
     MOI.empty!(sampler)
 
+    # Collect warm-start values
+    for vi in MOI.get(model, MOI.ListOfVariableIndices())
+        xi = MOI.get(model, MOI.VariablePrimalStart(), vi)
+        
+        MOI.set(sampler, MOI.VariablePrimalStart(), vi, xi)
+    end
+    
     sampler.source = Anneal.parse_qubo_model(T, model)::QUBOTools.Model
     sampler.target = QUBOTools.format(
         Anneal.model_sense(sampler),
