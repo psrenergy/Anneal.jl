@@ -331,8 +331,8 @@ macro anew(raw_args...)
 
         mutable struct $(esc(id)){T} <: Anneal.AutomaticSampler{T}
             # ~*~ QUBOTools Backend model ~*~ #
-            source::Union{QUBOTools.Model,Nothing}
-            target::Union{QUBOTools.Model,Nothing}
+            source::Union{QUBOTools.Model{VI,T,Int},Nothing}
+            target::Union{QUBOTools.Model{VI,T,Int},Nothing}
             # ~*~ Attributes ~*~ #
             attrs::Anneal._SamplerAttributeData{T}
 
@@ -365,5 +365,19 @@ macro anew(raw_args...)
 
             return nothing
         end
+
+        function Anneal.test_config!(::Type{$(esc(id))}, model::MOI.ModelLike)
+            $(esc(:test_config!))(model)
+
+            return nothing
+        end
+
+        function Anneal.test_config!(::Type{$(esc(id))}, model::JuMP.Model)
+            $(esc(:test_config!))(model)
+
+            return nothing
+        end
+
+        function $(esc(:test_config!))(::Union{JuMP.Model,MOI.ModelLike}) end
     end
 end

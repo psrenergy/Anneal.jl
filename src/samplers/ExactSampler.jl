@@ -12,7 +12,7 @@ end
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Model ~*~ #
-    Q, α, β = Anneal.qubo(sampler, Dict, T)
+    Q, α, β = Anneal.qubo(sampler, Dict)
 
     # ~*~ Retrieve Attributes ~*~ #
     n = MOI.get(sampler, MOI.NumberOfVariables())

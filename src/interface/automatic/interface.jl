@@ -10,7 +10,7 @@ Anneal.model_sense(sampler::AutomaticSampler) = QUBOTools.sense(sampler.source):
     model_domain(sampler)::Union{Symbol,Nothing}
 """ function model_domain end
 
-Anneal.model_domain(sampler::AutomaticSampler) = QUBOTools.domain(sampler.source)::QUBOTools.VariableDomain
+Anneal.model_domain(sampler::AutomaticSampler) = QUBOTools.domain(sampler.source)::QUBOTools.Domain
 
 @doc raw"""
     solver_sense(sampler)::Union{Symbol,Nothing}

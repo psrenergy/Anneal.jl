@@ -149,8 +149,7 @@ end
 function parse_qubo_model(T::Type, model::MOI.ModelLike)
     # ~*~ Check for emptiness ~*~ #
     if MOI.is_empty(model)
-        @warn "The given model is empty"
-        return QUBOTools.StandardQUBOModel{VI,Int,T,QUBOTools.BoolDomain}(
+        return QUBOTools.Model{VI,Int,T}(
             Dict{VI,T}(),
             Dict{Tuple{VI,VI},T}(),
         )
@@ -191,7 +190,7 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     # ~*~ Retrieve Variable Domain ~*~ #
     # Assuming:
     # - 𝕊, 𝔹 ⊆ Ω
-    D = if !isempty(𝕊) && !isempty(𝔹)
+    domain = if !isempty(𝕊) && !isempty(𝔹)
         @error "The given model contains both boolean and spin variables"
         flag = true
 
@@ -203,7 +202,7 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
 
             nothing
         else
-            QUBOTools.BoolDomain
+            QUBOTools.BoolDomain()
         end
     elseif isempty(𝔹) # Ising model?
         if 𝕊 != Ω
@@ -212,7 +211,7 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
 
             nothing
         else
-            QUBOTools.SpinDomain
+            QUBOTools.SpinDomain()
         end
     end
 
@@ -223,17 +222,18 @@ function parse_qubo_model(T::Type, model::MOI.ModelLike)
     end
 
     # ~*~ Retrieve Model ~*~ #
-    L, Q, offset = __extract_qubo_model(T, Ω, model, D())
+    L, Q, offset = __extract_qubo_model(T, Ω, model, domain)
     scale        = one(T)
 
     # ~*~ Objective Sense ~*~ #
     sense = QUBOTools.Sense(MOI.get(model, MOI.ObjectiveSense()))
 
     # ~*~ Return Model ~*~ #
-    return QUBOTools.Model{D,VI,T,Int}(
+    return QUBOTools.Model{VI,T,Int}(
         L, Q;
         scale  = scale,
         offset = offset,
         sense  = sense,
+        domain = domain,
     )
 end

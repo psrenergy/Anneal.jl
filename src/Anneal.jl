@@ -30,11 +30,10 @@ export ↑, ↓
 
 # ~*~ See:
 # https://github.com/jump-dev/MathOptInterface.jl/issues/1985
-QUBOTools.varcmp(x::VI, y::VI) = isless(x.value, y.value)
+QUBOTools.varlt(x::VI, y::VI) = isless(x.value, y.value)
 
 # ~*~ Imports: Tests + Benchmarking ~*~ #
 import Test
-import BenchmarkTools
 
 # -*- Includes: Library -*- #
 include("lib/error.jl")
@@ -62,7 +61,7 @@ export @anew
 include("test/test.jl")
 
 # -*- Includes: Benchmark -*-
-include("benchmark/benchmark.jl")
+# include("benchmark/benchmark.jl")
 
 # -*- Includes: Submodules -*-
 include("samplers/IdentitySampler.jl")
