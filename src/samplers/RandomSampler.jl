@@ -28,9 +28,10 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Validate Input ~*~ #
     @assert num_reads >= 0
     @assert isnothing(seed) || seed >= 0
+    @assert rng_type <: AbstractRNG
 
     # ~*~ Sample Random States ~*~ #
-    rng     = rng_type(seed)::AbstractRNG
+    rng     = rng_type(seed)
     results = @timed random_sample(rng, Q, α, β, n, num_reads)
     samples = results.value
 

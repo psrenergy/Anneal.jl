@@ -366,18 +366,11 @@ macro anew(raw_args...)
             return nothing
         end
 
-        function Anneal.test_config!(::Type{$(esc(id))}, model::MOI.ModelLike)
-            $(esc(:test_config!))(model)
+        # `do` block version
+        function $(esc(:test))(config!::Function; examples::Bool = false)
+            Anneal.test(config!, $(esc(id)); examples = examples)
 
             return nothing
         end
-
-        function Anneal.test_config!(::Type{$(esc(id))}, model::JuMP.Model)
-            $(esc(:test_config!))(model)
-
-            return nothing
-        end
-
-        function $(esc(:test_config!))(::Union{JuMP.Model,MOI.ModelLike}) end
     end
 end
