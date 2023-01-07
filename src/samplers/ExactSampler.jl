@@ -10,6 +10,16 @@ Anneal.@anew Optimizer begin
     domain = :bool
 end
 
+@doc raw"""
+    ExactSampler.Optimizer{T}
+
+This sampler performs an exhaustive search over all ``2^{n}`` possible states.
+
+!!! warn
+    Due to the exponetially large amount of visited states, it is not possible
+    to use this sampler for problems any larger than ``20`` variables big.
+""" Optimizer
+
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Model ~*~ #
     Q, α, β = Anneal.qubo(sampler, Dict)

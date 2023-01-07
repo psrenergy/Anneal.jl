@@ -24,7 +24,7 @@ import QUBOTools: ↑, ↓
 
 # ~*~ Expots: QUBOTools Backend ~*~ #
 export QUBOTools, SampleSet, Sample
-export ising, qubo, adjacency, reads, state, value
+export ising, qubo, reads
 export sampleset, variables, indices
 export ↑, ↓
 

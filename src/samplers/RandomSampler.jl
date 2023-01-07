@@ -11,9 +11,18 @@ Anneal.@anew Optimizer begin
     attributes = begin
         RandomSeed["seed"]::Union{Integer,Nothing}  = nothing
         NumberOfReads["num_reads"]::Integer         = 1_000
-        RandomGenerator["rng"]::Any                 = Xoshiro
+        RandomGenerator["rng"]::AbstractRNG         = Random.GLOBAL_RNG
     end
 end
+
+@doc raw"""
+    RandomSampler.Optimizer{T}
+
+## Attributes
+- `RandomSeed`, `"seed"`: Random seed to initialize the random number generator.
+- `NumberOfReads`, `"num_reads"`: Number of random states sampled per run.
+- `RandomGenerator`, `"rng"`: Random Number Generator instance.
+""" Optimizer
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Model ~*~ #
@@ -23,15 +32,17 @@ function Anneal.sample(sampler::Optimizer{T}) where {T}
     n         = MOI.get(sampler, MOI.NumberOfVariables())
     num_reads = MOI.get(sampler, RandomSampler.NumberOfReads())
     seed      = MOI.get(sampler, RandomSampler.RandomSeed())
-    rng_type  = MOI.get(sampler, RandomSampler.RandomGenerator())
+    rng       = MOI.get(sampler, RandomSampler.RandomGenerator())
 
     # ~*~ Validate Input ~*~ #
     @assert num_reads >= 0
     @assert isnothing(seed) || seed >= 0
-    @assert rng_type <: AbstractRNG
+    @assert rng isa AbstractRNG
+
+    # ~*~ Seed Random Number generator ~*~ #
+    Random.seed!(rng, seed)
 
     # ~*~ Sample Random States ~*~ #
-    rng     = rng_type(seed)
     results = @timed random_sample(rng, Q, α, β, n, num_reads)
     samples = results.value
 
