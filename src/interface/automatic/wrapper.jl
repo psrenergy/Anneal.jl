@@ -26,17 +26,17 @@ function MOI.copy_to(sampler::AutomaticSampler{T}, model::MOI.ModelLike) where {
     # Collect warm-start values
     for vi in MOI.get(model, MOI.ListOfVariableIndices())
         xi = MOI.get(model, MOI.VariablePrimalStart(), vi)
-        
+
         MOI.set(sampler, MOI.VariablePrimalStart(), vi, xi)
     end
-    
+
     sampler.source = Anneal.parse_qubo_model(T, model)::QUBOTools.Model
-    sampler.target = QUBOTools.format(
+    sampler.target = QUBOTools.cast(
         Anneal.model_sense(sampler),
-        Anneal.model_domain(sampler),
         Anneal.solver_sense(sampler),
+        Anneal.model_domain(sampler),
         Anneal.solver_domain(sampler),
-        sampler.source
+        sampler.source,
     )::QUBOTools.Model
 
     return MOIU.identity_index_map(model)
@@ -86,7 +86,7 @@ end
 
 function MOI.get(sampler::AutomaticSampler, ::MOI.RawStatusString)
     metadata = QUBOTools.metadata(QUBOTools.sampleset(frontend(sampler)))::Dict{String,Any}
-    
+
     if !haskey(metadata, "status")
         return ""
     else
@@ -188,19 +188,23 @@ function MOI.get(sampler::AutomaticSampler, ::MOI.NumberOfVariables)
 end
 
 # ~*~ File IO: Base API ~*~ #
-function Base.write(filename::AbstractString, sampler::AutomaticSampler, fmt::QUBOTools.AbstractFormat = QUBOTools.infer_format(filename))
-    return QUBOTools.write_model(filename, frontend(sampler), fmt)
-end
+# function Base.write(
+#     filename::AbstractString,
+#     sampler::AutomaticSampler,
+#     fmt::QUBOTools.AbstractFormat = QUBOTools.infer_format(filename),
+# )
+#     return QUBOTools.write_model(filename, frontend(sampler), fmt)
+# end
 
-function Base.read!(filename::AbstractString, sampler::AutomaticSampler, fmt::QUBOTools.AbstractFormat = QUBOTools.infer_format(filename))
-    sampler.source = QUBOTools.read_model(filename, fmt)
-    sampler.target = __transpose_model(sampler, sampler.source)
+# function Base.read!(
+#     filename::AbstractString,
+#     sampler::AutomaticSampler,
+#     fmt::QUBOTools.AbstractFormat = QUBOTools.infer_format(filename),
+# )
+#     sampler.source = QUBOTools.read_model(filename, fmt)
+#     sampler.target = QUBOTools.format(sampler, sampler.source)
 
-    return sampler
-end
+#     return sampler
+# end
 
-MOI.supports(
-    ::AbstractSampler,
-    ::MOI.VariablePrimalStart,
-    ::MOI.VariableIndex,
-) = true
+MOI.supports(::AbstractSampler, ::MOI.VariablePrimalStart, ::MOI.VariableIndex) = true

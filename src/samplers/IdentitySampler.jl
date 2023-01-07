@@ -1,14 +1,18 @@
 module IdentitySampler
 
-using Anneal
-using MathOptInterface
-const MOI = MathOptInterface
+using Anneal # Exports MOI
 
 Anneal.@anew Optimizer begin
     name   = "Identity Sampler"
     sense  = :min
     domain = :bool
 end
+
+@doc raw"""
+    IdentitySampler.Optimizer{T}
+
+This sampler selects precisely the state vector provided as warm-start.
+""" Optimizer
 
 function Anneal.sample(sampler::Optimizer{T}) where {T}
     # ~*~ Retrieve Attributes ~*~ #

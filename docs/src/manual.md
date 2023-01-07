@@ -44,7 +44,7 @@ Anneal.@anew
 Inside a module scope for the new interface, one should call the [`Anneal.@anew`](@ref anew) macro, specifying the solver's attributes as described in the macro's docs.
 The second and last step is to define the `Anneal.sample(::Optimizer)` method, that must return a [`Anneal.SampleSet`](@ref sampleset).
 
-Using it might be somehow restrictive in comparison to the regular [JuMP/MOI Solver Interface workflow]((https://jump.dev/MathOptInterface.jl/stable/tutorials/implementing/)).
+Using it might be somehow restrictive in comparison to the regular [JuMP/MOI Solver Interface workflow](https://jump.dev/MathOptInterface.jl/stable/tutorials/implementing/).
 Yet, our guess is that most of this package's users are not considering going deeper into the MOI internals that soon.
 
 ### [`@anew`](@ref anew-macro) example
@@ -73,11 +73,9 @@ module SuperSampler
     function Anneal.sample(sampler::Optimizer{T}) where {T}
         # ~ Is your annealer running on the Ising Model? Have this:
         h, J, u, v = Anneal.ising(
+            sampler,
             Vector, # Here we opt for a sparse, vector representation
-            T,      # The coefficient type
-            sampler
         )
-
 
         n = MOI.get(sampler, MOI.NumberOfVariables())
 
@@ -186,7 +184,7 @@ Their values must be either `:min` or `:max` and `:boll` or `:spin`, respectivel
 Strings, symbols and literals are supported as input for these fields.
 
 ```julia
-sense = :max
+sense  = :max
 domain = :spin
 ```
 
@@ -198,3 +196,8 @@ version = v"1.0.2"
 ```
 
 # Model Mapping
+
+# Automatic Tests
+```@docs
+Anneal.test
+```

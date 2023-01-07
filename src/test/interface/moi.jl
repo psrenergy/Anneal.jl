@@ -1,4 +1,4 @@
-function __test_moi_interface(::Type{S}) where {S<:AbstractSampler}
+function __test_moi_interface(::Function, ::Type{S}) where {S<:AbstractSampler}
     Test.@testset "MOI" verbose = true begin
         Test.@testset "`optimize!` Interface" begin
             # ~*~ Emptiness ~*~ #

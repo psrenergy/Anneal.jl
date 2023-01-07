@@ -1,4 +1,4 @@
-function __test_basic_examples(sampler::Type{S}) where {S<:AbstractSampler}
+function __test_basic_examples(config!::Function, sampler::Type{S}) where {S<:AbstractSampler}
     Test.@testset "⊚ Basic ⊚" verbose = true begin
         n = 3
 
@@ -15,10 +15,12 @@ function __test_basic_examples(sampler::Type{S}) where {S<:AbstractSampler}
         Test.@testset "▷ Bool ⋄ Min" begin
             # -*- Build Model -*- #
             model = JuMP.Model(sampler)
+
             JuMP.@variable(model, x[1:n], Bin)
             JuMP.@objective(model, Min, x' * Q * x)
 
-            Anneal.test_config!(sampler, model)
+            # -* Configure Model *- #
+            config!(model)
 
             # -*- Run -*- #
             JuMP.optimize!(model)
@@ -46,10 +48,12 @@ function __test_basic_examples(sampler::Type{S}) where {S<:AbstractSampler}
         Test.@testset "▷ Bool ⋄ Max" begin
             # -*- Build Model -*- #
             model = JuMP.Model(sampler)
+            
             JuMP.@variable(model, x[1:n], Bin)
             JuMP.@objective(model, Max, x' * Q * x)
 
-            Anneal.test_config!(sampler, model)
+            # -* Configure Model *- #
+            config!(model)
 
             # -*- Run -*- #
             JuMP.optimize!(model)
@@ -84,10 +88,12 @@ function __test_basic_examples(sampler::Type{S}) where {S<:AbstractSampler}
         Test.@testset "▷ Spin ⋄ Min" begin
             # -*- Build Model -*- #
             model = JuMP.Model(sampler)
+
             JuMP.@variable(model, s[1:n], Anneal.Spin)
             JuMP.@objective(model, Min, s' * J * s + h' * s)
 
-            Anneal.test_config!(sampler, model)
+            # -* Configure Model *- #
+            config!(model)
 
             # -*- Run -*- #
             JuMP.optimize!(model)
@@ -115,10 +121,12 @@ function __test_basic_examples(sampler::Type{S}) where {S<:AbstractSampler}
         Test.@testset "▷ Spin ⋄ Max" begin
             # -*- Build Model -*- #
             model = JuMP.Model(sampler)
+
             JuMP.@variable(model, s[1:n], Anneal.Spin)
             JuMP.@objective(model, Max, s' * J * s + h' * s)
 
-            Anneal.test_config!(sampler, model)
+            # -* Configure Model *- #
+            config!(model)
 
             # -*- Run -*- #
             JuMP.optimize!(model)

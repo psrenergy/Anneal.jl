@@ -8,17 +8,17 @@ Anneal.AbstractSampler
 ## [Identity Sampler](@id identity-sampler)
 
 ```@docs
-Anneal.IdentitySampler
+Anneal.IdentitySampler.Optimizer
 ```
 
 ## [Exact Sampler](@id exact-sampler)
 
 ```@docs
-Anneal.ExactSampler
+Anneal.ExactSampler.Optimizer
 ```
 
 ## [Random Sampler](@id random-sampler)
 
 ```@docs
-Anneal.RandomSampler
+Anneal.RandomSampler.Optimizer
 ```

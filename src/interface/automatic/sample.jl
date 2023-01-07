@@ -20,10 +20,10 @@ function Anneal.sample!(sampler::AutomaticSampler)
     results = @timed Anneal.sample(sampler)
 
     target_results = _parse_results(results)
-    source_results = QUBOTools.format(
+    source_results = QUBOTools.cast(
         QUBOTools.sense(backend(sampler)),
-        QUBOTools.domain(backend(sampler)),
         QUBOTools.sense(frontend(sampler)),
+        QUBOTools.domain(backend(sampler)),
         QUBOTools.domain(frontend(sampler)),
         target_results,
     )
