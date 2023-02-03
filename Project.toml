@@ -1,6 +1,6 @@
 name    = "Anneal"
 uuid    = "e4d9eb7f-b088-426e-aeb5-1c0dae3d8abb"
-version = "0.6.0"
+version = "0.6.1"
 authors = [
     "pedromxavier <pedroxavier@psr-inc.com>",
     "pedroripper <pedroripper@psr-inc.com>",
