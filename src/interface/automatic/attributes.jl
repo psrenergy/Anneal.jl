@@ -233,6 +233,13 @@ end
 
 function MOI.supports(
     ::AutomaticSampler,
+    ::_SAMPLER_ATTRIBUTES
+)
+    return true
+end
+
+function MOI.supports(
+    ::AutomaticSampler,
     ::MOI.VariablePrimalStart,
     ::Type{MOI.VariableIndex},
 )
