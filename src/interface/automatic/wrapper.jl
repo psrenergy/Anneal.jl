@@ -210,5 +210,5 @@ end
 MOI.supports(::AbstractSampler, ::MOI.VariablePrimalStart, ::MOI.VariableIndex) = true
 
 function MOI.supports(sampler::AutomaticSampler, raw_attr::MOI.RawOptimizerAttribute)
-    return raw_attr.name in keys(sampler.attrs.rawattrs)
+    return haskey(sampler.attrs.rawattrs, raw_attr.name)
 end
