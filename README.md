@@ -1,5 +1,8 @@
 # Anneal.jl 🔴🟢🟣🔵
 
+> **Warning**
+> This package was archived. Consider using [QUBODrivers](https://github.com/psrenergy/QUBODrivers.jl) instead.
+
 <div align="center">
     <a href="/docs/src/assets/">
         <img src="/docs/src/assets/logo.svg" width=400px alt="Anneal.jl" />
